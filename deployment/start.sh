@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-pushd cadre-data/middleware
+pushd /home/ubuntu/cadre-data/middleware
 source venv/bin/activate
-exec python server.py
+exec python app.py
 
 
