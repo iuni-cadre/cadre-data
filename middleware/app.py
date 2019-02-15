@@ -1,11 +1,16 @@
-from flask import Flask
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
 
 @app.route('/')
-def hello_world():
-    return 'Hello World!'
+def welcome():
+    return 'Welcome to the Cadre Data API.'
+
+
+@app.route('/status')
+def status():
+    return jsonify({'Status': 'The API is running'})
 
 
 if __name__ == '__main__':
