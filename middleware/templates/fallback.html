@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% set s_title %}{% block title %}Home{% endblock %}{% endset %}{{ s_title }} - CADRE Data API Fallback Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <!-- Trying to use bootstrap -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="page-header">
+                <h1 class="text-center" style="padding-top: 40px">This is the fallback page for the Cadre Data API.</h1>
+            </div>
+        </div>
+        <br> <br>
+        <div id="footer">
+            <div class="container text-center">
+                <p class="text-muted credit" style="color:#fff">© <a href="https://iuni.iu.edu/">IU Network Science Institute</a></p>
+            </div>
+        </div>
+    </body>
+</html>
