@@ -6,3 +6,4 @@ pip==19.0.1
 setuptools==40.8.0
 wheel==0.32.3
 Werkzeug==0.14.1
+psycopg2==2.7.7
