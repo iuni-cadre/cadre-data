@@ -17,12 +17,12 @@ connection = psycopg2.connect(user=util.config_reader.get_cadre_db_username(),
                               host=util.config_reader.get_cadre_db_hostname(),
                               port=util.config_reader.get_cadre_db_port(),
                               database=util.config_reader.get_cadre_db_name())
-cursor = connection.cursor()
 
 
 @app.route('/database')
 def connect_database():
     try:
+        cursor = connection.cursor()
         # Print PostgreSQL Connection properties
         print(connection.get_dsn_parameters(), "\n")
         # Print PostgreSQL version
@@ -34,10 +34,11 @@ def connect_database():
         print("Error while connecting to PostgreSQL", error)
     finally:
         # Closing database connection.
-            if (connection):
+            #if (connection):
                 cursor.close()
-                connection.close()
+                #connection.close()
                 print("PostgreSQL connection is closed")
+    print("made it through")
 
 
 @app.route('/')
