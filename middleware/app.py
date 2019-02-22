@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, render_template
+from flask_cors import CORS
 import os, sys
 import psycopg2
 import collections
@@ -12,6 +13,7 @@ sys.path.append(cadre)
 import util.config_reader
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = util.config_reader.get_app_secret()
 
 connection = psycopg2.connect(user=util.config_reader.get_cadre_db_username(),
