@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template
 from flask_cors import CORS
+from psycopg2 import pool
 import os, sys
 import psycopg2
 import collections
@@ -16,16 +17,24 @@ app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = util.config_reader.get_app_secret()
 
-connection = psycopg2.connect(user=util.config_reader.get_cadre_db_username(),
-                              password=util.config_reader.get_cadre_db_pwd(),
-                              host=util.config_reader.get_cadre_db_hostname(),
-                              port=util.config_reader.get_cadre_db_port(),
-                              database=util.config_reader.get_cadre_db_name())
+
+connection_pool = pool.SimpleConnectionPool(1,
+                                            20,
+                                            host=util.config_reader.get_cadre_db_hostname(),
+                                            database=util.config_reader.get_cadre_db_name(),
+                                            user=util.config_reader.get_cadre_db_username(),
+                                            password=util.config_reader.get_cadre_db_pwd(),
+                                            port=util.config_reader.get_cadre_db_port())
+
+if connection_pool:
+    print("Connection pool created successfully")
 
 
 @app.route('/database')
 def connect_database():
     try:
+        # Use getconn() method to Get Connection from connection pool
+        connection = connection_pool.getconn()
         cursor = connection.cursor()
         # Print PostgreSQL Connection properties
         print(connection.get_dsn_parameters(), "\n")
@@ -38,15 +47,17 @@ def connect_database():
         print("Error while connecting to PostgreSQL", error)
     finally:
         # Closing database connection.
-           # if (connection):
         cursor.close()
-           # connection.close()
-        print("PostgreSQL connection is closed")
+        # Use this method to release the connection object and send back ti connection pool
+        connection_pool.putconn(connection)
+        print("PostgreSQL connection pool is closed")
 
 
 @app.route('/database/<string:year>')
 def show_post(year):
     try:
+        # Use getconn() method to Get Connection from connection pool
+        connection = connection_pool.getconn()
         cursor = connection.cursor()
         # call stored procedure
         cursor.callproc('show_wos_summary', [year, ])
@@ -119,10 +130,10 @@ def show_post(year):
         print("Error while connecting to PostgreSQL", error)
     finally:
         # Closing database connection.
-            # if (connection):
         cursor.close()
-            # connection.close()
-        print("PostgreSQL connection is closed")
+        # Use this method to release the connection object and send back ti connection pool
+        connection_pool.putconn(connection)
+        print("PostgreSQL connection pool is closed")
 
 
 @app.route('/')
