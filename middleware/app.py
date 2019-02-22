@@ -36,10 +36,10 @@ def connect_database():
         print("Error while connecting to PostgreSQL", error)
     finally:
         # Closing database connection.
-            # if (connection):
-                cursor.close()
-                # connection.close()
-                print("PostgreSQL connection is closed")
+           # if (connection):
+        cursor.close()
+           # connection.close()
+        print("PostgreSQL connection is closed")
 
 
 @app.route('/database/<string:year>')
@@ -118,9 +118,9 @@ def show_post(year):
     finally:
         # Closing database connection.
             # if (connection):
-                cursor.close()
-                # connection.close()
-                print("PostgreSQL connection is closed")
+        cursor.close()
+            # connection.close()
+        print("PostgreSQL connection is closed")
 
 
 @app.route('/')
