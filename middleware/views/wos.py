@@ -31,7 +31,7 @@ def wos_status():
         }
         headers = {
             'auth-token': auth_token,
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/json'
         }
         validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(),
                                                 data=json.dumps(validata_token_args),
@@ -80,7 +80,7 @@ def get_publications_per_year(year):
         }
         headers = {
             'auth-token': auth_token,
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/json'
         }
         validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(),
                                                 data=json.dumps(validata_token_args),
