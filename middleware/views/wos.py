@@ -30,10 +30,12 @@ def wos_status():
             'username': username
         }
         headers = {
-            'auth_token': auth_token
+            'auth-token': auth_token
         }
-        validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(), data=validata_token_args,
-                                                headers=headers)
+        validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(),
+                                                data=validata_token_args,
+                                                headers=headers,
+                                                verify=False)
         status_code = validate_token_response.status_code
         if status_code == 200:
             # Use getconn() method to Get Connection from connection pool
@@ -76,9 +78,12 @@ def get_publications_per_year(year):
             'username': username
         }
         headers = {
-            'auth_token': auth_token
+            'auth-token': auth_token
         }
-        validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(), data=validata_token_args, headers=headers)
+        validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(),
+                                                data=validata_token_args,
+                                                headers=headers,
+                                                verify=False)
         status_code = validate_token_response.status_code
         if status_code == 200:
             logger.info('User authorized !!!')
