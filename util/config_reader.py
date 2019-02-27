@@ -89,3 +89,14 @@ def get_cadre_db_pwd():
         traceback.print_tb(e.__traceback__)
         logger.error('Unable to find cadre.config file. Make sure you have cadre.config inside conf directory !')
         raise Exception('Unable to find cadre.config file !')
+
+
+def get_cadre_token_ep():
+    try:
+        config = get_cadre_config()
+        token_ep = config['CADRE']['token-api']
+        return token_ep
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        logger.error('Unable to find cadre.config file. Make sure you have cadre.config inside conf directory !')
+        raise Exception('Unable to find cadre.config file !')
