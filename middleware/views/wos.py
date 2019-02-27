@@ -30,10 +30,11 @@ def wos_status():
             'username': username
         }
         headers = {
-            'auth-token': auth_token
+            'auth-token': auth_token,
+            'Content-Type': 'application/x-www-form-urlencoded'
         }
         validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(),
-                                                data=validata_token_args,
+                                                data=json.dumps(validata_token_args),
                                                 headers=headers,
                                                 verify=False)
         status_code = validate_token_response.status_code
@@ -78,10 +79,11 @@ def get_publications_per_year(year):
             'username': username
         }
         headers = {
-            'auth-token': auth_token
+            'auth-token': auth_token,
+            'Content-Type': 'application/x-www-form-urlencoded'
         }
         validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(),
-                                                data=validata_token_args,
+                                                data=json.dumps(validata_token_args),
                                                 headers=headers,
                                                 verify=False)
         status_code = validate_token_response.status_code
