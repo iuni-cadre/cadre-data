@@ -21,7 +21,7 @@ from util.db_util import connection_pool
 import util.config_reader
 
 
-@blueprint.route('/api/data/wos/status')
+@blueprint.route('/api/data/wos/status', methods=['GET'])
 def wos_status():
     try:
         auth_token = request.headers.get('auth-token')
@@ -70,7 +70,7 @@ def wos_status():
         print("PostgreSQL connection pool is closed")
 
 
-@blueprint.route('/api/data/wos/publications/<string:year>')
+@blueprint.route('/api/data/wos/publications/<string:year>', methods=['GET'])
 def get_publications_per_year(year):
     try:
         auth_token = request.headers.get('auth-token')
