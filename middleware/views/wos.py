@@ -88,10 +88,14 @@ def get_publications_per_year(year):
                                                 verify=False)
         status_code = validate_token_response.status_code
         if status_code == 200:
+            role_found = False
             response_json = validate_token_response.json()
             roles = response_json['roles']
             logger.info('User authorized !!!')
-            if 'wos' in roles:
+            for role in roles:
+                if 'wos' in role:
+                    role_found = True
+            if role_found:
                 logger.info('User has wos role')
                 # Use getconn() method to Get Connection from connection pool
                 connection = connection_pool.getconn()
