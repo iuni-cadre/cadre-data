@@ -88,77 +88,84 @@ def get_publications_per_year(year):
                                                 verify=False)
         status_code = validate_token_response.status_code
         if status_code == 200:
+            response_json = validate_token_response.json()
+            roles = response_json['roles']
             logger.info('User authorized !!!')
-            # Use getconn() method to Get Connection from connection pool
-            connection = connection_pool.getconn()
-            cursor = connection.cursor()
-            # call stored procedure
-            cursor.callproc('show_wos_summary', [year, ])
-            result = cursor.fetchall()
-            # Convert query results to objects of key-value pairs
-            objects_list = []
-            for row in result:
-                d = collections.OrderedDict()
-                d['ID'] = row[0]
-                d['FileNumber'] = row[1]
-                d['CollID'] = row[2]
-                d['PubYear'] = row[3]
-                d['Season'] = row[4]
-                d['PubMonth'] = row[5]
-                d['PubDay'] = row[6]
-                d['CoverDate'] = row[7]
-                d['EDate'] = row[8]
-                d['Vol'] = row[9]
-                d['Issue'] = row[10]
-                d['VolIss'] = row[11]
-                d['Supplement'] = row[12]
-                d['SpecialIssue'] = row[13]
-                d['PartNo'] = row[14]
-                d['PubType'] = row[15]
-                d['Medium'] = row[16]
-                d['Model'] = row[17]
-                d['Indicator'] = row[18]
-                d['Inpi'] = row[19]
-                d['IsArchive'] = row[20]
-                d['City'] = row[21]
-                d['Country'] = row[22]
-                d['HasAbstract'] = row[23]
-                d['SortDate'] = row[24]
-                d['TitleCount'] = row[25]
-                d['NameCount'] = row[26]
-                d['DocTypeCount'] = row[27]
-                d['ConferenceCount'] = row[28]
-                d['LanguageCount'] = row[29]
-                d['NormalizedLanguageCount'] = row[30]
-                d['NormalizedDocTypeCount'] = row[31]
-                d['DescriptiveRefCount'] = row[32]
-                d['ReferenceCount'] = row[33]
-                d['AddressCount'] = row[34]
-                d['HeadingsCount'] = row[35]
-                d['SubHeadingsCount'] = row[36]
-                d['SubjectsCount'] = row[37]
-                d['FundAck'] = row[38]
-                d['GrantsCount'] = row[39]
-                d['GrantsComplete'] = row[40]
-                d['KeywordCount'] = row[41]
-                d['AbstractCount'] = row[42]
-                d['ItemCollId'] = row[43]
-                d['ItemIds'] = row[44]
-                d['ItemIdsAvail'] = row[45]
-                d['BibId'] = row[46]
-                d['BibPageCount'] = row[47]
-                d['BibPageCountType'] = row[48]
-                d['ReviewedLanguageCount'] = row[49]
-                d['ReviewedAuthorCount'] = row[50]
-                d['ReviewedYear'] = row[51]
-                d['KeywordsPlusCount'] = row[52]
-                d['BookChapters'] = row[53]
-                d['BookPages'] = row[54]
-                d['BookNotesCount'] = row[55]
-                d['ChapterListCount'] = row[56]
-                d['ContributorCount'] = row[57]
-                objects_list.append(d)
-            return json.dumps(objects_list), 200
+            if 'wos' in roles:
+                logger.info('User has wos role')
+                # Use getconn() method to Get Connection from connection pool
+                connection = connection_pool.getconn()
+                cursor = connection.cursor()
+                # call stored procedure
+                cursor.callproc('show_wos_summary', [year, ])
+                result = cursor.fetchall()
+                # Convert query results to objects of key-value pairs
+                objects_list = []
+                for row in result:
+                    d = collections.OrderedDict()
+                    d['ID'] = row[0]
+                    d['FileNumber'] = row[1]
+                    d['CollID'] = row[2]
+                    d['PubYear'] = row[3]
+                    d['Season'] = row[4]
+                    d['PubMonth'] = row[5]
+                    d['PubDay'] = row[6]
+                    d['CoverDate'] = row[7]
+                    d['EDate'] = row[8]
+                    d['Vol'] = row[9]
+                    d['Issue'] = row[10]
+                    d['VolIss'] = row[11]
+                    d['Supplement'] = row[12]
+                    d['SpecialIssue'] = row[13]
+                    d['PartNo'] = row[14]
+                    d['PubType'] = row[15]
+                    d['Medium'] = row[16]
+                    d['Model'] = row[17]
+                    d['Indicator'] = row[18]
+                    d['Inpi'] = row[19]
+                    d['IsArchive'] = row[20]
+                    d['City'] = row[21]
+                    d['Country'] = row[22]
+                    d['HasAbstract'] = row[23]
+                    d['SortDate'] = row[24]
+                    d['TitleCount'] = row[25]
+                    d['NameCount'] = row[26]
+                    d['DocTypeCount'] = row[27]
+                    d['ConferenceCount'] = row[28]
+                    d['LanguageCount'] = row[29]
+                    d['NormalizedLanguageCount'] = row[30]
+                    d['NormalizedDocTypeCount'] = row[31]
+                    d['DescriptiveRefCount'] = row[32]
+                    d['ReferenceCount'] = row[33]
+                    d['AddressCount'] = row[34]
+                    d['HeadingsCount'] = row[35]
+                    d['SubHeadingsCount'] = row[36]
+                    d['SubjectsCount'] = row[37]
+                    d['FundAck'] = row[38]
+                    d['GrantsCount'] = row[39]
+                    d['GrantsComplete'] = row[40]
+                    d['KeywordCount'] = row[41]
+                    d['AbstractCount'] = row[42]
+                    d['ItemCollId'] = row[43]
+                    d['ItemIds'] = row[44]
+                    d['ItemIdsAvail'] = row[45]
+                    d['BibId'] = row[46]
+                    d['BibPageCount'] = row[47]
+                    d['BibPageCountType'] = row[48]
+                    d['ReviewedLanguageCount'] = row[49]
+                    d['ReviewedAuthorCount'] = row[50]
+                    d['ReviewedYear'] = row[51]
+                    d['KeywordsPlusCount'] = row[52]
+                    d['BookChapters'] = row[53]
+                    d['BookPages'] = row[54]
+                    d['BookNotesCount'] = row[55]
+                    d['ChapterListCount'] = row[56]
+                    d['ContributorCount'] = row[57]
+                    objects_list.append(d)
+                return json.dumps(objects_list), 200
+            else:
+                logger.info('User has guest role. He does not have access to WOS database.. Please login with BTAA member institution, if you are part of it..')
+                return jsonify({'error': 'User is not authorized to access data in WOS'}), 405
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
