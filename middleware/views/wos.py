@@ -39,16 +39,27 @@ def wos_status():
                                                 verify=False)
         status_code = validate_token_response.status_code
         if status_code == 200:
-            # Use getconn() method to Get Connection from connection pool
-            connection = connection_pool.getconn()
-            cursor = connection.cursor()
-            # Print PostgreSQL Connection properties
-            print(connection.get_dsn_parameters(), "\n")
-            # Print PostgreSQL version
-            cursor.execute("SELECT user, current_database();")
-            record = cursor.fetchone()
-            print("You are connected to - ", record, "\n")
-            return jsonify({'You are connected to': connection.get_dsn_parameters()}), 200
+            role_found = False
+            response_json = validate_token_response.json()
+            roles = response_json['roles']
+            logger.info('User authorized !!!')
+            for role in roles:
+                if 'wos' in role:
+                    role_found = True
+            if role_found:
+                # Use getconn() method to Get Connection from connection pool
+                connection = connection_pool.getconn()
+                cursor = connection.cursor()
+                # Print PostgreSQL Connection properties
+                print(connection.get_dsn_parameters(), "\n")
+                # Print PostgreSQL version
+                cursor.execute("SELECT user, current_database();")
+                record = cursor.fetchone()
+                print("You are connected to - ", record, "\n")
+                return jsonify({'You are connected to': connection.get_dsn_parameters()}), 200
+            else:
+                logger.info('User has guest role. He does not have access to WOS database.. Please login with BTAA member institution, if you are part of it..')
+                return jsonify({'error': 'User is not authorized to access data in WOS'}), 405
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
