@@ -58,7 +58,8 @@ def wos_status():
                 print("You are connected to - ", record, "\n")
                 return jsonify({'You are connected to': connection.get_dsn_parameters()}), 200
             else:
-                logger.info('User has guest role. He does not have access to WOS database.. Please login with BTAA member institution, if you are part of it..')
+                logger.info('User has guest role. He does not have access to WOS database.. '
+                            'Please login with BTAA member institution, if you are part of it..')
                 return jsonify({'error': 'User is not authorized to access data in WOS'}), 405
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
@@ -179,7 +180,8 @@ def get_publications_per_year(year):
                     objects_list.append(d)
                 return json.dumps(objects_list), 200
             else:
-                logger.info('User has guest role. He does not have access to WOS database.. Please login with BTAA member institution, if you are part of it..')
+                logger.info('User has guest role. He does not have access to WOS database.. '
+                            'Please login with BTAA member institution, if you are part of it..')
                 return jsonify({'error': 'User is not authorized to access data in WOS'}), 405
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
@@ -200,3 +202,9 @@ def get_publications_per_year(year):
         # Use this method to release the connection object and send back ti connection pool
         connection_pool.putconn(connection)
         print("PostgreSQL connection pool is closed")
+
+
+@blueprint.route('/api/data/wos/test-sns', methods=['GET'])
+def test_aws_sns():
+
+    logger.info('message sent !!!')

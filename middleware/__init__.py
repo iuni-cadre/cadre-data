@@ -7,16 +7,26 @@ from os import path, remove
 from flask import Flask
 from flask_cors import CORS
 
+from flask_graphql import GraphQLView
+
+
 abspath = os.path.abspath(os.path.dirname(__file__))
 cadre = os.path.dirname(abspath)
 util = cadre + '/util'
+middleware = cadre + '/middleware'
 sys.path.append(cadre)
 
 import util.config_reader
+from middleware.views.schema import Query, schema
 
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = util.config_reader.get_app_secret()
+
+view_func = GraphQLView.as_view(
+    'graphql', schema=schema, graphiql=True)
+
+app.add_url_rule('/graphql', view_func=view_func)
 
 # If applicable, delete the existing log file to generate a fresh log file during each execution
 logfile_path = abspath + "/cadre_data_logging.log"
