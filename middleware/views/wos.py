@@ -72,7 +72,7 @@ def wos_status():
             return jsonify({'error': 'Something went wrong. Contact admins'}), 500
     except (Exception, psycopg2.Error) as error:
         traceback.print_tb(error.__traceback__)
-        logger.error('Error while connecting to PostgreSQL')
+        logger.error('Error while connecting to PostgreSQL. Error is ' + str(error))
         return jsonify({'error': str(error)}), 500
     finally:
         # Closing database connection.
@@ -194,7 +194,7 @@ def get_publications_per_year(year):
             return jsonify({'error': 'Something went wrong. Contact admins'}), 500
     except (Exception, psycopg2.Error) as error:
         traceback.print_tb(error.__traceback__)
-        logger.error('Error while connecting to PostgreSQL')
+        logger.error('Error while connecting to Postgres.. Error is ' + str(error))
         return jsonify({'error': str(error)}), 500
     finally:
         # Closing database connection.
@@ -206,5 +206,4 @@ def get_publications_per_year(year):
 
 @blueprint.route('/api/data/wos/test-sns', methods=['GET'])
 def test_aws_sns():
-
     logger.info('message sent !!!')

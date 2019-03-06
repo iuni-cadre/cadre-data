@@ -109,8 +109,9 @@ class Query(graphene.ObjectType):
         try:
             connection = connection_pool.getconn()
             cursor = connection.cursor()
+            yearstring = str(year)
             # call stored procedure
-            cursor.callproc('show_wos_summary', [year, ])
+            cursor.callproc('show_wos_summary', [yearstring, ])
             result = cursor.fetchall()
             # Convert query results to objects of key-value pairs
             objects_list = []
@@ -175,10 +176,10 @@ class Query(graphene.ObjectType):
                 wos.ChapterListCount = row[56]
                 wos.ContributorCount = row[57]
                 objects_list.append(wos)
-            return json2obj(json.dumps(objects_list))
+            return objects_list
         except (Exception, psycopg2.Error) as error:
             traceback.print_tb(error.__traceback__)
-            logger.error('Error while connecting to PostgreSQL')
+            logger.error('Error while connecting to PostgreSQL. Error is ' + str(error))
             return jsonify({'error': str(error)}), 500
         finally:
             # Closing database connection.
