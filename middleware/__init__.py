@@ -24,9 +24,9 @@ CORS(app)
 app.config['SECRET_KEY'] = util.config_reader.get_app_secret()
 
 view_func = GraphQLView.as_view(
-    'graphql', schema=schema, graphiql=True)
+    '/api/data/wos-graphql/publication', schema=schema, graphiql=True)
 
-app.add_url_rule('/graphql', view_func=view_func)
+app.add_url_rule('/api/data/wos-graphql/publication', view_func=view_func)
 
 # If applicable, delete the existing log file to generate a fresh log file during each execution
 logfile_path = abspath + "/cadre_data_logging.log"
