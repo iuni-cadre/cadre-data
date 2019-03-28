@@ -152,42 +152,44 @@ class Query(graphene.ObjectType):
                     logger.info(interface_query)
                     logger.info(value_array)
                     cursor.execute(interface_query, value_array)
-                    result = cursor.fetchall()
-                    # Convert query results to objects of key-value pairs
                     objects_list = []
-                    for row in result:
-                        wos = WOSInterfacetable()
-                        wos.wos_id = row[0]
-                        wos.title = row[1]
-                        wos.type = row[2]
-                        wos.year = row[3]
-                        wos.number = row[4]
-                        wos.issue = row[5]
-                        wos.pages = row[6]
-                        wos.id_pubmed = row[7]
-                        wos.doi = row[8]
-                        wos.authors_full_name = row[9]
-                        wos.authors_id_orcid = row[10]
-                        wos.authors_id_dais = row[11]
-                        wos.authors_id_research = row[12]
-                        wos.authors_id_lang = row[13]
-                        wos.authors_prefix = row[14]
-                        wos.authors_first_name = row[15]
-                        wos.authors_middle_name = row[16]
-                        wos.authors_last_name = row[17]
-                        wos.authors_suffix = row[18]
-                        wos.authors_initials = row[19]
-                        wos.authors_display_names = row[20]
-                        wos.authors_wos_name = row[21]
-                        wos.authors_emails = row[22]
-                        wos.references = row[23]
-                        wos.journals_name = row[24]
-                        wos.journals_name_abbrev = row[25]
-                        wos.journals_name_iso = row[26]
-                        wos.journals_type = row[27]
-                        wos.journals_issn = row[28]
-                        wos.abstract_text = row[29]
-                        objects_list.append(wos)
+                    if cursor.rowcount > 0:
+                        result = cursor.fetchall()
+                        logger.info(len(result))
+                        # Convert query results to objects of key-value pairs
+                        for row in result:
+                            wos = WOSInterfacetable()
+                            wos.wos_id = row[0]
+                            wos.title = row[1]
+                            wos.type = row[2]
+                            wos.year = row[3]
+                            wos.number = row[4]
+                            wos.issue = row[5]
+                            wos.pages = row[6]
+                            wos.id_pubmed = row[7]
+                            wos.doi = row[8]
+                            wos.authors_full_name = row[9]
+                            wos.authors_id_orcid = row[10]
+                            wos.authors_id_dais = row[11]
+                            wos.authors_id_research = row[12]
+                            wos.authors_id_lang = row[13]
+                            wos.authors_prefix = row[14]
+                            wos.authors_first_name = row[15]
+                            wos.authors_middle_name = row[16]
+                            wos.authors_last_name = row[17]
+                            wos.authors_suffix = row[18]
+                            wos.authors_initials = row[19]
+                            wos.authors_display_names = row[20]
+                            wos.authors_wos_name = row[21]
+                            wos.authors_emails = row[22]
+                            wos.references = row[23]
+                            wos.journals_name = row[24]
+                            wos.journals_name_abbrev = row[25]
+                            wos.journals_name_iso = row[26]
+                            wos.journals_type = row[27]
+                            wos.journals_issn = row[28]
+                            wos.abstract_text = row[29]
+                            objects_list.append(wos)
                     return objects_list
                 else:
                     logger.info('User has guest role. He does not have access to WOS database.. '
