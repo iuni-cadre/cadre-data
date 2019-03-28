@@ -127,7 +127,7 @@ class Query(graphene.ObjectType):
                                 # year_operands.append(operand)
                         elif field == 'journalsName':
                             if value is not None:
-                                interface_query += ' journals_name LIKE %s ' + operand
+                                interface_query += ' journals_name LIKE %%s% ' + operand
                                 value = value.upper()
                                 # journals.append(value)
                                 value_array.append(value)
@@ -141,12 +141,12 @@ class Query(graphene.ObjectType):
                                 # wos_id_operands.append(operand)
                         elif field == 'authorsFullName':
                             if value is not None:
-                                interface_query += ' authors_display_names LIKE %s ' + operand
+                                interface_query += ' authors_display_names LIKE %%s% ' + operand
                                 # authors.append(value)
                                 value_array.append(value)
                         elif field == 'abstractText':
                             if value is not None:
-                                interface_query += ' abstract_text LIKE %s ' + operand
+                                interface_query += ' abstract_text LIKE %%s% ' + operand
                                 # authors.append(value)
                                 value_array.append(value)
                             # author_operands.append(operand)
