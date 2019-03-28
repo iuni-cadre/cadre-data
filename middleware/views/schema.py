@@ -125,13 +125,13 @@ class Query(graphene.ObjectType):
                                 # years.append(value)
                                 value_array.append(value)
                                 # year_operands.append(operand)
-                        elif field == 'journalName':
+                        elif field == 'journalsName':
                             if value is not None:
                                 interface_query += 'journals_name=%s ' + operand
                                 # journals.append(value)
                                 value_array.append(value)
                                 # journal_operands.append(operand)
-                        elif field == 'wos_id':
+                        elif field == 'wosId':
                             if value is not None:
                                 interface_query += 'wos_id=%s ' + operand
                                 # wos_ids.append(value)
