@@ -127,7 +127,8 @@ class Query(graphene.ObjectType):
                                 # year_operands.append(operand)
                         elif field == 'journalsName':
                             if value is not None:
-                                interface_query += ' journals_name=%s ' + operand
+                                interface_query += ' journals_name LIKE %s ' + operand
+                                value = value.upper()
                                 # journals.append(value)
                                 value_array.append(value)
                                 # journal_operands.append(operand)
@@ -135,14 +136,20 @@ class Query(graphene.ObjectType):
                             if value is not None:
                                 interface_query += ' wos_id=%s ' + operand
                                 # wos_ids.append(value)
+                                value = value.upper()
                                 value_array.append(value)
                                 # wos_id_operands.append(operand)
-                        elif field == 'author':
+                        elif field == 'authorsFullName':
                             if value is not None:
-                                interface_query += ' authors_display_names=%s ' + operand
+                                interface_query += ' authors_display_names LIKE %s ' + operand
                                 # authors.append(value)
                                 value_array.append(value)
-                                # author_operands.append(operand)
+                        elif field == 'abstractText':
+                            if value is not None:
+                                interface_query += ' abstract_text LIKE %s ' + operand
+                                # authors.append(value)
+                                value_array.append(value)
+                            # author_operands.append(operand)
 
                     # year_dict.update({'year': years, 'operands': year_operands})
                     # journals_dict.update({'journals': journals, 'operands': journal_operands})
