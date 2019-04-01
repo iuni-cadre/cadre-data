@@ -17,7 +17,7 @@ middleware = cadre + '/middleware'
 sys.path.append(cadre)
 
 import util.config_reader
-from middleware.views.schema import Query, schema
+from middleware.views.schema import schema
 
 app = Flask(__name__)
 CORS(app)
@@ -43,7 +43,8 @@ logging.config.dictConfig(config_dict)
 logger = logging.getLogger(__name__)
 logger.info('Completed configuring logger()!')
 
-from .views import wos, mag, cadre_data
+from .views import wos, mag, cadre_data, wos_sns
 app.register_blueprint(wos.blueprint)
 app.register_blueprint(mag.blueprint)
 app.register_blueprint(cadre_data.blueprint)
+app.register_blueprint(wos_sns.blueprint)
