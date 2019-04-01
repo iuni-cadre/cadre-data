@@ -21,7 +21,7 @@ sys.path.append(cadre)
 import util.config_reader
 
 
-@blueprint.route('/api/data/wos/publications', methods=['GET'])
+@blueprint.route('/api/data/wos/publications-async', methods=['GET'])
 def submit_query():
     try:
         q = request.json.get('q')
