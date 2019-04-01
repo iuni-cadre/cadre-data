@@ -9,7 +9,7 @@ import boto3
 
 from flask import Blueprint, jsonify, request
 
-blueprint = Blueprint('wos', __name__)
+blueprint = Blueprint('wos_sns', __name__)
 logger = logging.getLogger('wos_sns')
 
 abspath = os.path.abspath(os.path.dirname(__file__))
