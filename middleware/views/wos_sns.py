@@ -40,7 +40,7 @@ def submit_query():
                                                 verify=False)
         status_code = validate_token_response.status_code
         if status_code == 200:
-            client = boto3.client('sns')
+            client = boto3.client('sns', region_name='us-east-1')
 
             role_found = False
             response_json = validate_token_response.json()
@@ -54,10 +54,11 @@ def submit_query():
                 logger.info('User has wos role')
                 logger.info(q)
                 query_json = {"default": q}
+                query_in_string = json.dump(query_json)
 
                 response = client.publish(
                     TopicArn='arn:aws:sns:us-east-2:799597216943:cadre-wos',
-                    Message=query_json,
+                    Message=query_in_string,
                     MessageStructure='json'
                 )
                 logger.info(response)
