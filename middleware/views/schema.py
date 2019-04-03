@@ -19,7 +19,7 @@ cadre = os.path.dirname(middleware)
 util = cadre + '/util'
 sys.path.append(cadre)
 
-from util.db_util import connection_pool
+from util.db_util import wos_connection_pool
 import util.config_reader
 
 
@@ -79,7 +79,7 @@ class Query(graphene.ObjectType):
     def resolve_wos(self, info, **args):
         try:
             q = args.get('q')
-            connection = connection_pool.getconn()
+            connection = wos_connection_pool.getconn()
             cursor = connection.cursor()
             auth_token = info.context.environ['HTTP_AUTH_TOKEN']
             username = info.context.environ['HTTP_AUTH_USERNAME']
@@ -221,7 +221,7 @@ class Query(graphene.ObjectType):
             # Closing database connection.
             if connection:
                 cursor.close()
-                connection_pool.putconn(connection)
+                wos_connection_pool.putconn(connection)
                 logger.info("PostgreSQL connection pool is closed")
 
 

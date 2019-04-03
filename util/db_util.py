@@ -14,13 +14,25 @@ import util.config_reader
 logger = logging.getLogger(__name__)
 
 
-connection_pool = pool.SimpleConnectionPool(1,
-                                            20,
-                                            host=util.config_reader.get_cadre_db_hostname(),
-                                            database=util.config_reader.get_cadre_db_name(),
-                                            user=util.config_reader.get_cadre_db_username(),
-                                            password=util.config_reader.get_cadre_db_pwd(),
-                                            port=util.config_reader.get_cadre_db_port())
+wos_connection_pool = pool.SimpleConnectionPool(1,
+                                                20,
+                                                host=util.config_reader.get_wos_db_hostname(),
+                                                database=util.config_reader.get_wos_db_name(),
+                                                user=util.config_reader.get_wos_db_username(),
+                                                password=util.config_reader.get_wos_db_pwd(),
+                                                port=util.config_reader.get_wos_db_port())
 
-if connection_pool:
-    logger.info("Connection pool created successfully")
+if wos_connection_pool:
+    logger.info("Connection pool for WOS database created successfully")
+
+
+cadre_meta_connection_pool = pool.SimpleConnectionPool(1,
+                                                20,
+                                                host=util.config_reader.get_cadre_db_hostname(),
+                                                database=util.config_reader.get_cadre_db_name(),
+                                                user=util.config_reader.get_cadre_db_username(),
+                                                password=util.config_reader.get_cadre_db_pwd(),
+                                                port=util.config_reader.get_cadre_db_port())
+
+if cadre_meta_connection_pool:
+    logger.info("Connection pool for cadre meta database created successfully")

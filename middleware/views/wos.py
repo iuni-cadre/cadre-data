@@ -17,7 +17,7 @@ cadre = os.path.dirname(middleware)
 util = cadre + '/util'
 sys.path.append(cadre)
 
-from util.db_util import connection_pool
+from util.db_util import wos_connection_pool
 import util.config_reader
 
 
@@ -48,7 +48,7 @@ def wos_status():
                     role_found = True
             if role_found:
                 # Use getconn() method to Get Connection from connection pool
-                connection = connection_pool.getconn()
+                connection = wos_connection_pool.getconn()
                 cursor = connection.cursor()
                 # Print PostgreSQL Connection properties
                 print(connection.get_dsn_parameters(), "\n")
@@ -78,7 +78,7 @@ def wos_status():
         # Closing database connection.
         cursor.close()
         # Use this method to release the connection object and send back ti connection pool
-        connection_pool.putconn(connection)
+        wos_connection_pool.putconn(connection)
         print("PostgreSQL connection pool is closed")
 
 
@@ -110,7 +110,7 @@ def get_publications_per_year(year):
             if role_found:
                 logger.info('User has wos role')
                 # Use getconn() method to Get Connection from connection pool
-                connection = connection_pool.getconn()
+                connection = wos_connection_pool.getconn()
                 cursor = connection.cursor()
                 # call stored procedure
                 cursor.callproc('show_wos_summary', [year, ])
@@ -200,7 +200,7 @@ def get_publications_per_year(year):
         # Closing database connection.
         cursor.close()
         # Use this method to release the connection object and send back ti connection pool
-        connection_pool.putconn(connection)
+        wos_connection_pool.putconn(connection)
         print("PostgreSQL connection pool is closed")
 
 

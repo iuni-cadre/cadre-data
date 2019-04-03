@@ -1,4 +1,5 @@
 import traceback
+import uuid
 
 import requests
 import os, sys
@@ -19,9 +20,10 @@ util = cadre + '/util'
 sys.path.append(cadre)
 
 import util.config_reader
+from util.db_util import cadre_meta_connection_pool
 
 
-@blueprint.route('/api/data/wos/publications-async', methods=['GET'])
+@blueprint.route('/api/data/wos/publications-async', methods=['POST'])
 def submit_query():
     try:
         q = request.json.get('q')
@@ -40,11 +42,20 @@ def submit_query():
                                                 verify=False)
         status_code = validate_token_response.status_code
         if status_code == 200:
-            client = boto3.client('sns', region_name='us-east-1')
+            sns_client = boto3.client('sns',
+                    aws_access_key_id=util.config_reader.get_aws_access_key(),
+                    aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
+                    region_name=util.config_reader.get_aws_region())
+
+            s3_client = boto3.client('s3',
+                                      aws_access_key_id=util.config_reader.get_aws_access_key(),
+                                      aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
+                                      region_name=util.config_reader.get_aws_region())
 
             role_found = False
             response_json = validate_token_response.json()
             roles = response_json['roles']
+            user_id = response_json['user_id']
             logger.info('User authorized !!!')
 
             for role in roles:
@@ -53,17 +64,45 @@ def submit_query():
             if role_found:
                 logger.info('User has wos role')
                 logger.info(q)
-                query_json = {"default": q}
-                query_in_string = json.dump(query_json)
-
-                response = client.publish(
-                    TopicArn='arn:aws:sns:us-east-2:799597216943:cadre-wos',
+                query_in_string = json.dumps(q)
+                logger.info(query_in_string)
+                response = sns_client.publish(
+                    TopicArn=util.config_reader.get_aws_sns_wos_topic(),
                     Message=query_in_string,
-                    MessageStructure='json'
+                    MessageStructure='string'
                 )
                 logger.info(response)
-                message_id = response['message_id']
-                return jsonify({'message_id': message_id}, 200)
+                if 'MessageId' in response:
+                    message_id = response['MessageId']
+                    # auto generated job id
+                    job_id = uuid.uuid4()
+                    # save job information to meta database
+                    connection = cadre_meta_connection_pool.getconn()
+                    cursor = connection.cursor()
+                    insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id, s3_location,job_status, created_on) VALUES (%s,%s,%s,'SUBMITTED',clock_timestamp())"
+                    s3_bucket_name = util.config_reader.get_aws_s3_root() + '/' + username
+                    s3_location = 's3//' + util.config_reader.get_aws_s3_default_query()
+                    response = s3_client.create_bucket(
+                        ACL='public-read',
+                        Bucket=s3_bucket_name,
+                        CreateBucketConfiguration={
+                            'LocationConstraint': util.config_reader.get_aws_region(),
+                        },
+                        ObjectLockEnabledForBucket=False)
+                    if 'Location' in response:
+                        s3_location = response['Location']
+                        logger.info(s3_location)
+                    else:
+                        logger.info('Error while creating S3 bucket. Use default s3 bucket instead..')
+                    data = (job_id, user_id, message_id, s3_location, 'SUBMITTED')
+                    cursor.execute(insert_q, data)
+
+                    return jsonify({'message_id': message_id,
+                                    'job_id': job_id,
+                                    's3_location': s3_location}, 200)
+                else:
+                    logger.error("Error while publishing to sns")
+                    return jsonify({'error': 'error while publishing to SNS'}, 500)
             else:
                 logger.info('User has guest role. He does not have access to WOS database.. '
                         'Please login with BTAA member institution, if you are part of it..')
@@ -79,5 +118,5 @@ def submit_query():
             return jsonify({'error': 'Something went wrong. Contact admins'}), 500
     except (Exception, psycopg2.Error) as error:
         traceback.print_tb(error.__traceback__)
-        logger.error('Error while connecting to AWS SNS. Error is ' + str(error))
+        logger.error('Error while connecting to cadre meta database. Error is ' + str(error))
         return jsonify({'error': str(error)}), 500
