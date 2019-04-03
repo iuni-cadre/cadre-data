@@ -149,7 +149,7 @@ def get_cadre_db_pwd():
 def get_cadre_token_ep():
     try:
         config = get_cadre_config()
-        token_ep = config['CADRE_META_DATABASE_INFO']['token-api']
+        token_ep = config['CADRE']['token-api']
         return token_ep
     except Exception as e:
         traceback.print_tb(e.__traceback__)
