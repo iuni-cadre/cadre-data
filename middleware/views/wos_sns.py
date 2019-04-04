@@ -28,7 +28,6 @@ from util.db_util import cadre_meta_connection_pool
 def submit_query():
     try:
         q = request.json.get('q')
-        q['']
         auth_token = request.headers.get('auth-token')
         username = request.headers.get('auth-username')
         validata_token_args = {
