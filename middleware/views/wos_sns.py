@@ -66,34 +66,36 @@ def submit_query():
                 logger.info(q)
                 query_in_string = json.dumps(q)
                 logger.info(query_in_string)
-                response = sns_client.publish(
+                # auto generated job id
+                job_id = uuid.uuid4()
+                s3_bucket_name = util.config_reader.get_aws_s3_root() + '/' + job_id
+                s3_location = 's3//' + util.config_reader.get_aws_s3_default_query()
+                s3_response = s3_client.create_bucket(
+                    ACL='public-read',
+                    Bucket=s3_bucket_name,
+                    CreateBucketConfiguration={
+                        'LocationConstraint': util.config_reader.get_aws_region(),
+                    },
+                    ObjectLockEnabledForBucket=False)
+                if 'Location' in s3_response:
+                    s3_location = s3_response['Location']
+                    logger.info(s3_location)
+                else:
+                    logger.info('Error while creating S3 bucket. Use default s3 bucket instead..')
+
+                sns_response = sns_client.publish(
                     TopicArn=util.config_reader.get_aws_sns_wos_topic(),
                     Message=query_in_string,
                     MessageStructure='string'
                 )
-                logger.info(response)
-                if 'MessageId' in response:
-                    message_id = response['MessageId']
-                    # auto generated job id
-                    job_id = uuid.uuid4()
+                logger.info(sns_response)
+                if 'MessageId' in sns_response:
+                    message_id = sns_response['MessageId']
                     # save job information to meta database
                     connection = cadre_meta_connection_pool.getconn()
                     cursor = connection.cursor()
-                    insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id, s3_location,job_status, created_on) VALUES (%s,%s,%s,'SUBMITTED',clock_timestamp())"
-                    s3_bucket_name = util.config_reader.get_aws_s3_root() + '/' + username
-                    s3_location = 's3//' + util.config_reader.get_aws_s3_default_query()
-                    response = s3_client.create_bucket(
-                        ACL='public-read',
-                        Bucket=s3_bucket_name,
-                        CreateBucketConfiguration={
-                            'LocationConstraint': util.config_reader.get_aws_region(),
-                        },
-                        ObjectLockEnabledForBucket=False)
-                    if 'Location' in response:
-                        s3_location = response['Location']
-                        logger.info(s3_location)
-                    else:
-                        logger.info('Error while creating S3 bucket. Use default s3 bucket instead..')
+                    insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id, s3_location,job_status, created_on) VALUES (%s,%s,%s,%s,clock_timestamp())"
+
                     data = (job_id, user_id, message_id, s3_location, 'SUBMITTED')
                     cursor.execute(insert_q, data)
 
