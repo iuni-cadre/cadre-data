@@ -28,6 +28,7 @@ from util.db_util import cadre_meta_connection_pool
 def submit_query():
     try:
         q = request.json.get('q')
+        q['']
         auth_token = request.headers.get('auth-token')
         username = request.headers.get('auth-username')
         validata_token_args = {
@@ -61,9 +62,6 @@ def submit_query():
                     role_found = True
             if role_found:
                 logger.info('User has wos role')
-                logger.info(q)
-                query_in_string = json.dumps(q)
-                logger.info(query_in_string)
                 # auto generated job id
                 job_id = str(uuid.uuid4())
                 logger.info(job_id)
@@ -78,6 +76,11 @@ def submit_query():
                 s3_location = 's3://' + bucket_job_id
                 logger.info(s3_location)
                 root_bucket.put_object(Bucket=root_bucket_name, Key=s3_job_dir)
+                logger.info(q)
+                q['job_id'] = job_id
+                q['s3_location'] = s3_location
+                query_in_string = json.dumps(q)
+                logger.info(query_in_string)
                 sns_response = sns_client.publish(
                     TopicArn=util.config_reader.get_aws_sns_wos_topic(),
                     Message=query_in_string,
