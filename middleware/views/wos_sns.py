@@ -67,7 +67,7 @@ def submit_query():
                 query_in_string = json.dumps(q)
                 logger.info(query_in_string)
                 # auto generated job id
-                job_id = uuid.uuid4()
+                job_id = str(uuid.uuid4())
                 s3_bucket_name = util.config_reader.get_aws_s3_root() + '/' + job_id
                 s3_location = 's3//' + util.config_reader.get_aws_s3_default_query()
                 s3_response = s3_client.create_bucket(
