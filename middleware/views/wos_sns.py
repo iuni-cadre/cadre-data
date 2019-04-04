@@ -28,7 +28,6 @@ from util.db_util import cadre_meta_connection_pool
 def submit_query():
     try:
         q = request.json.get('q')
-        q_json = json.loads(q)
         auth_token = request.headers.get('auth-token')
         username = request.headers.get('auth-username')
         validata_token_args = {
@@ -76,9 +75,9 @@ def submit_query():
                 s3_location = 's3://' + bucket_job_id
                 logger.info(s3_location)
                 root_bucket.put_object(Bucket=root_bucket_name, Key=s3_job_dir)
-                q_json['job_id'] = job_id
-                q_json['s3_location'] = s3_location
-                query_in_string = json.dumps(q_json)
+                q.append({'job_id': job_id})
+                q.append({'s3_location': s3_location})
+                query_in_string = json.dumps(q)
                 logger.info(query_in_string)
                 sns_response = sns_client.publish(
                     TopicArn=util.config_reader.get_aws_sns_wos_topic(),
