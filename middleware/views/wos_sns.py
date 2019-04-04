@@ -71,10 +71,11 @@ def submit_query():
                                            aws_access_key_id=util.config_reader.get_aws_access_key(),
                                            aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
                                            region_name=util.config_reader.get_aws_region())
-                root_bucket = s3_client.Bucket(util.config_reader.get_aws_s3_root())
-                bucket_job_id = util.config_reader.get_aws_s3_root() + '/' + job_id
+                root_bucket_name = util.config_reader.get_aws_s3_root()
+                root_bucket = s3_client.Bucket(root_bucket_name)
+                bucket_job_id = root_bucket_name + '/' + job_id
                 s3_location = 's3://' + bucket_job_id
-                job_folder = root_bucket.new_key(bucket_job_id)
+                root_bucket.put_object(Bucket=root_bucket_name, Key=bucket_job_id)
                 sns_response = sns_client.publish(
                     TopicArn=util.config_reader.get_aws_sns_wos_topic(),
                     Message=query_in_string,
