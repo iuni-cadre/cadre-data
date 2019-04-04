@@ -7,6 +7,7 @@ import psycopg2
 import json
 import logging.config
 import boto3
+from boto3 import Session
 
 from flask import Blueprint, jsonify, request
 
@@ -47,10 +48,7 @@ def submit_query():
                     aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
                     region_name=util.config_reader.get_aws_region())
 
-            s3_client = boto3.client('s3',
-                                      aws_access_key_id=util.config_reader.get_aws_access_key(),
-                                      aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
-                                      region_name=util.config_reader.get_aws_region())
+
 
             role_found = False
             response_json = validate_token_response.json()
@@ -68,21 +66,14 @@ def submit_query():
                 logger.info(query_in_string)
                 # auto generated job id
                 job_id = str(uuid.uuid4())
-                s3_bucket_name = util.config_reader.get_aws_s3_root() + '/' + job_id
-                s3_location = 's3//' + util.config_reader.get_aws_s3_default_query()
-                s3_response = s3_client.create_bucket(
-                    ACL='public-read',
-                    Bucket=s3_bucket_name,
-                    CreateBucketConfiguration={
-                        'LocationConstraint': util.config_reader.get_aws_region(),
-                    },
-                    ObjectLockEnabledForBucket=False)
-                if 'Location' in s3_response:
-                    s3_location = s3_response['Location']
-                    logger.info(s3_location)
-                else:
-                    logger.info('Error while creating S3 bucket. Use default s3 bucket instead..')
-
+                session = Session(aws_access_key_id=util.config_reader.get_aws_access_key(),
+                                  aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
+                                  region_name=util.config_reader.get_aws_region())
+                s3_client = session.resource('s3')
+                root_bucket = s3_client.bucket(util.config_reader.get_aws_s3_root())
+                bucket_job_id = root_bucket + '/' + job_id
+                s3_location = 's3://' + bucket_job_id
+                job_folder = root_bucket.new_key(bucket_job_id)
                 sns_response = sns_client.publish(
                     TopicArn=util.config_reader.get_aws_sns_wos_topic(),
                     Message=query_in_string,
