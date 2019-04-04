@@ -67,15 +67,17 @@ def submit_query():
                 # auto generated job id
                 job_id = str(uuid.uuid4())
                 logger.info(job_id)
+                s3_job_dir = job_id + '/'
                 s3_client = boto3.resource('s3',
                                            aws_access_key_id=util.config_reader.get_aws_access_key(),
                                            aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
                                            region_name=util.config_reader.get_aws_region())
                 root_bucket_name = util.config_reader.get_aws_s3_root()
                 root_bucket = s3_client.Bucket(root_bucket_name)
-                bucket_job_id = root_bucket_name + '/' + job_id
+                bucket_job_id = root_bucket_name + '/' + s3_job_dir
                 s3_location = 's3://' + bucket_job_id
-                root_bucket.put_object(Bucket=root_bucket_name, Key=bucket_job_id)
+                logger.info(s3_location)
+                root_bucket.put_object(Bucket=root_bucket_name, Key=s3_job_dir)
                 sns_response = sns_client.publish(
                     TopicArn=util.config_reader.get_aws_sns_wos_topic(),
                     Message=query_in_string,
@@ -84,12 +86,14 @@ def submit_query():
                 logger.info(sns_response)
                 if 'MessageId' in sns_response:
                     message_id = sns_response['MessageId']
+                    logger.info(message_id)
                     # save job information to meta database
                     connection = cadre_meta_connection_pool.getconn()
                     cursor = connection.cursor()
                     insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id, s3_location,job_status, created_on) VALUES (%s,%s,%s,%s,clock_timestamp())"
 
                     data = (job_id, user_id, message_id, s3_location, 'SUBMITTED')
+                    logger.info(data)
                     cursor.execute(insert_q, data)
 
                     return jsonify({'message_id': message_id,
