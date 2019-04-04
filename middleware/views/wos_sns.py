@@ -90,11 +90,12 @@ def submit_query():
                     # save job information to meta database
                     connection = cadre_meta_connection_pool.getconn()
                     cursor = connection.cursor()
-                    insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id, s3_location,job_status, created_on) VALUES (%s,%s,%s,%s,clock_timestamp())"
+                    insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id, s3_location,job_status, created_on) VALUES (%s,%s,%s,%s,%s,clock_timestamp())"
 
                     data = (job_id, user_id, message_id, s3_location, 'SUBMITTED')
                     logger.info(data)
                     cursor.execute(insert_q, data)
+                    connection.commit()
 
                     return jsonify({'message_id': message_id,
                                     'job_id': job_id,
