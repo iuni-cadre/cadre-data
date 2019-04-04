@@ -66,12 +66,13 @@ def submit_query():
                 logger.info(query_in_string)
                 # auto generated job id
                 job_id = str(uuid.uuid4())
-                session = Session(aws_access_key_id=util.config_reader.get_aws_access_key(),
-                                  aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
-                                  region_name=util.config_reader.get_aws_region())
-                s3_client = session.resource('s3')
-                root_bucket = s3_client.bucket(util.config_reader.get_aws_s3_root())
-                bucket_job_id = root_bucket + '/' + job_id
+                logger.info(job_id)
+                s3_client = boto3.resource('s3',
+                                           aws_access_key_id=util.config_reader.get_aws_access_key(),
+                                           aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
+                                           region_name=util.config_reader.get_aws_region())
+                root_bucket = s3_client.Bucket(util.config_reader.get_aws_s3_root())
+                bucket_job_id = util.config_reader.get_aws_s3_root() + '/' + job_id
                 s3_location = 's3://' + bucket_job_id
                 job_folder = root_bucket.new_key(bucket_job_id)
                 sns_response = sns_client.publish(
