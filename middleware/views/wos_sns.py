@@ -121,3 +121,9 @@ def submit_query():
         traceback.print_tb(error.__traceback__)
         logger.error('Error while connecting to cadre meta database. Error is ' + str(error))
         return jsonify({'error': str(error)}), 500
+    finally:
+        # Closing database connection.
+        cursor.close()
+        # Use this method to release the connection object and send back ti connection pool
+        cadre_meta_connection_pool.putconn(connection)
+        print("PostgreSQL connection pool is closed")
