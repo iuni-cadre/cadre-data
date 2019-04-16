@@ -30,19 +30,14 @@ class User(ObjectType):
 
 class WOSInterfacetable(ObjectType):
     wos_id = String()
-    title = String()
-    type = String()
     year = String()
     number = String()
     issue = String()
     pages = String()
-    id_pubmed = String()
-    doi = String()
     authors_full_name = String()
     authors_id_orcid = String()
     authors_id_dais = String()
     authors_id_research = String()
-    authors_id_lang = String()
     authors_prefix = String()
     authors_first_name = String()
     authors_middle_name = String()
@@ -51,14 +46,16 @@ class WOSInterfacetable(ObjectType):
     authors_initials = String()
     authors_display_names = String()
     authors_wos_name = String()
+    authors_id_lang = String()
     authors_emails = String()
     references = String()
-    journals_name = String()
-    journals_name_abbrev = String()
-    journals_name_iso = String()
-    journals_type = String()
-    journals_issn = String()
-    abstract_text = String()
+    issn = String()
+    doi = String()
+    title = String()
+    journal_name = String()
+    journal_abbrev = String()
+    journal_iso = String()
+    abstract_paragraphs = String()
 
 
 class WOSFields(graphene.ObjectType):
@@ -109,11 +106,11 @@ class Query(graphene.ObjectType):
                     logger.info(q)
                     query_json = json.loads(q)
                     value_array = []
-                    interface_query = 'SELECT wos_id, title, type, year, number, issue, pages, id_pubmed, doi, ' \
-                                      'authors_full_name, authors_id_orcid, authors_id_dais, authors_id_research, authors_id_lang, ' \
-                                      'authors_prefix, authors_first_name, authors_middle_name, authors_last_name, authors_suffix, authors_initials, ' \
-                                      'authors_display_names, authors_wos_name, authors_emails, journals_name, journals_name_abbrev, ' \
-                                      'journals_name_iso, journals_type, journals_issn, abstract_text, "references" FROM interface_table WHERE '
+                    interface_query = 'SELECT wos_id, year, number, issue, pages, authors_full_name, authors_id_orcid, ' \
+                                      'authors_id_dais, authors_id_research, authors_prefix, authors_first_name, authors_middle_name, ' \
+                                      'authors_last_name, authors_suffix, authors_initials, authors_display_name, authors_wos_name, ' \
+                                      'authors_id_lang, authors_email, "references", issn, doi, title, journal_name, journal_abbrev, ' \
+                                      'journal_iso, abstract_paragraphs FROM interface_table WHERE '
                     for item in query_json:
                         logger.info(item)
                         field = item['field']
@@ -122,36 +119,41 @@ class Query(graphene.ObjectType):
                         if field == 'year':
                             if value is not None:
                                 interface_query += ' year=%s ' + operand
-                                # years.append(value)
+                                value = value.strip()
+                                logger.info('Year: ' + value)
                                 value_array.append(value)
+                                # years.append(value)
                                 # year_operands.append(operand)
                         elif field == 'journalsName':
                             if value is not None:
-                                interface_query += ' journals_name LIKE %s ' + operand
+                                interface_query += ' journal_tsv @@ to_tsquery (%s) ' + operand
+                                value = value.strip()
+                                value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
+                                value = "'{}'".format(value)
+                                logger.info('Journals Name: ' + value)
+                                value_array.append(value)
                                 # journals.append(value)
-                                value_array.append(value)
                                 # journal_operands.append(operand)
-                        elif field == 'wosId':
-                            if value is not None:
-                                interface_query += ' wos_id=%s ' + operand
-                                # wos_ids.append(value)
-                                value = value.upper()
-                                value_array.append(value)
-                                # wos_id_operands.append(operand)
                         elif field == 'authorsFullName':
                             if value is not None:
-                                interface_query += ' authors_display_names LIKE %s ' + operand
-                                # authors.append(value)
-                                value = '%' + value.title() + '%'
+                                interface_query += ' authors_full_name iLIKE %s ' + operand
+                                value = value.strip()
+                                value = value.replace(' ', '%')
+                                value = '%' + value.upper() + '%'
+                                value = "'{}'".format(value)
+                                logger.info('Authors Full Name: ' + value)
                                 value_array.append(value)
-                        elif field == 'abstractText':
+                                # authors.append(value)
+                        elif field == 'title':
                             if value is not None:
-                                interface_query += ' abstract_text LIKE %s ' + operand
-                                # authors.append(value)
-                                value = '%' + value + '%'
+                                value = value.strip()
+                                value = value.replace(' ', '%')
+                                value = '%' + value.upper() + '%'
+                                value = "'{}'".format(value)
+                                logger.info('Title: ' + value)
                                 value_array.append(value)
-                            # author_operands.append(operand)
+                                interface_query += ' title_tsv @@ to_tsquery (%s) '.format(value) + operand
 
                     # year_dict.update({'year': years, 'operands': year_operands})
                     # journals_dict.update({'journals': journals, 'operands': journal_operands})
@@ -169,35 +171,32 @@ class Query(graphene.ObjectType):
                         for row in result:
                             wos = WOSInterfacetable()
                             wos.wos_id = row[0]
-                            wos.title = row[1]
-                            wos.type = row[2]
-                            wos.year = row[3]
-                            wos.number = row[4]
-                            wos.issue = row[5]
-                            wos.pages = row[6]
-                            wos.id_pubmed = row[7]
-                            wos.doi = row[8]
-                            wos.authors_full_name = row[9]
-                            wos.authors_id_orcid = row[10]
-                            wos.authors_id_dais = row[11]
-                            wos.authors_id_research = row[12]
-                            wos.authors_id_lang = row[13]
-                            wos.authors_prefix = row[14]
-                            wos.authors_first_name = row[15]
-                            wos.authors_middle_name = row[16]
-                            wos.authors_last_name = row[17]
-                            wos.authors_suffix = row[18]
-                            wos.authors_initials = row[19]
-                            wos.authors_display_names = row[20]
-                            wos.authors_wos_name = row[21]
-                            wos.authors_emails = row[22]
-                            wos.references = row[23]
-                            wos.journals_name = row[24]
-                            wos.journals_name_abbrev = row[25]
-                            wos.journals_name_iso = row[26]
-                            wos.journals_type = row[27]
-                            wos.journals_issn = row[28]
-                            wos.abstract_text = row[29]
+                            wos.year = row[1]
+                            wos.number = row[2]
+                            wos.issue = row[3]
+                            wos.pages = row[4]
+                            wos.authors_full_name = row[5]
+                            wos.authors_id_orcid = row[6]
+                            wos.authors_id_dais = row[7]
+                            wos.authors_id_research = row[8]
+                            wos.authors_prefix = row[9]
+                            wos.authors_first_name = row[10]
+                            wos.authors_middle_name = row[11]
+                            wos.authors_last_name = row[12]
+                            wos.authors_suffix = row[13]
+                            wos.authors_initials = row[14]
+                            wos.authors_display_names = row[15]
+                            wos.authors_wos_name = row[16]
+                            wos.authors_id_lang = row[17]
+                            wos.authors_emails = row[18]
+                            wos.references = row[19]
+                            wos.issn = row[20]
+                            wos.doi = row[21]
+                            wos.title = row[22]
+                            wos.journal_name = row[23]
+                            wos.journal_abbrev = row[24]
+                            wos.journal_iso = row[25]
+                            wos.abstract_paragraphs = row[26]
                             objects_list.append(wos)
                     return objects_list
                 else:

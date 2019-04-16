@@ -21,7 +21,7 @@ def welcome():
 @blueprint.route('/api/data/status')
 def status():
     # this route should return the status of the data API.
-    return jsonify({'Status': 'The API is running if the API is running.'}), 200
+    return jsonify({'Status': 'The API is running.'}), 200
 
 
 @blueprint.route('/<path:fallback>')
