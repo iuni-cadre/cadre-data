@@ -130,7 +130,6 @@ class Query(graphene.ObjectType):
                                 value = value.strip()
                                 value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
-                                value = "'{}'".format(value)
                                 logger.info('Journals Name: ' + value)
                                 value_array.append(value)
                                 # journals.append(value)
@@ -141,19 +140,17 @@ class Query(graphene.ObjectType):
                                 value = value.strip()
                                 value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
-                                value = "'{}'".format(value)
                                 logger.info('Authors Full Name: ' + value)
                                 value_array.append(value)
                                 # authors.append(value)
                         elif field == 'title':
                             if value is not None:
+                                interface_query += ' title_tsv @@ to_tsquery (%s) ' + operand
                                 value = value.strip()
                                 value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
-                                value = "'{}'".format(value)
                                 logger.info('Title: ' + value)
                                 value_array.append(value)
-                                interface_query += ' title_tsv @@ to_tsquery (%s) '.format(value) + operand
 
                     # year_dict.update({'year': years, 'operands': year_operands})
                     # journals_dict.update({'journals': journals, 'operands': journal_operands})
@@ -164,6 +161,8 @@ class Query(graphene.ObjectType):
                     logger.info(value_array)
                     cursor.execute(interface_query, value_array)
                     objects_list = []
+                    if cursor.rowcount == 0:
+                        logger.info('The value of the row count is zero.')
                     if cursor.rowcount > 0:
                         logger.info(str(cursor.rowcount))
                         result = cursor.fetchall()
