@@ -7,7 +7,7 @@ import psycopg2
 import json
 import logging.config
 import boto3
-from boto3 import Session
+from datetime import date
 
 from flask import Blueprint, jsonify, request
 
@@ -24,12 +24,21 @@ import util.config_reader
 from util.db_util import cadre_meta_connection_pool
 
 
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, date):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
 @blueprint.route('/api/data/wos/publications-async', methods=['POST'])
 def submit_query():
     try:
         q = request.json.get('q')
         auth_token = request.headers.get('auth-token')
         username = request.headers.get('auth-username')
+        connection = cadre_meta_connection_pool.getconn()
+        cursor = connection.cursor()
         validata_token_args = {
             'username': username
         }
@@ -89,8 +98,6 @@ def submit_query():
                     message_id = sns_response['MessageId']
                     logger.info(message_id)
                     # save job information to meta database
-                    connection = cadre_meta_connection_pool.getconn()
-                    cursor = connection.cursor()
                     insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id, s3_location,job_status, created_on) VALUES (%s,%s,%s,%s,%s,clock_timestamp())"
 
                     data = (job_id, user_id, message_id, s3_location, 'SUBMITTED')
@@ -104,6 +111,76 @@ def submit_query():
                 else:
                     logger.error("Error while publishing to sns")
                     return jsonify({'error': 'error while publishing to SNS'}, 500)
+            else:
+                logger.info('User has guest role. He does not have access to WOS database.. '
+                        'Please login with BTAA member institution, if you are part of it..')
+                return jsonify({'error': 'User is not authorized to access data in WOS'}), 405
+        elif status_code == 401:
+            logger.error('User is not authorized to access this endpoint !!!')
+            return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
+        elif status_code == 500:
+            logger.error('Unable to contact login server to validate the token !!!')
+            return jsonify({'error': 'Unable to contact login server to validate the token'}), 500
+        else:
+            logger.error('Something went wrong. Contact admins !!! ')
+            return jsonify({'error': 'Something went wrong. Contact admins'}), 500
+    except (Exception, psycopg2.Error) as error:
+        traceback.print_tb(error.__traceback__)
+        logger.error('Error while connecting to cadre meta database. Error is ' + str(error))
+        return jsonify({'error': str(error)}), 500
+    finally:
+        # Closing database connection.
+        cursor.close()
+        # Use this method to release the connection object and send back ti connection pool
+        cadre_meta_connection_pool.putconn(connection)
+        print("PostgreSQL connection pool is closed")
+
+
+@blueprint.route('/api/data/wos/job-status/<string:job_id>', methods=['POST'])
+def job_status(job_id):
+    try:
+        auth_token = request.headers.get('auth-token')
+        username = request.headers.get('auth-username')
+        connection = cadre_meta_connection_pool.getconn()
+        cursor = connection.cursor()
+        validata_token_args = {
+            'username': username
+        }
+        headers = {
+            'auth-token': auth_token,
+            'Content-Type': 'application/json'
+        }
+        validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(),
+                                                data=json.dumps(validata_token_args),
+                                                headers=headers,
+                                                verify=False)
+        status_code = validate_token_response.status_code
+        if status_code == 200:
+            role_found = False
+            response_json = validate_token_response.json()
+            roles = response_json['roles']
+            logger.info('User authorized !!!')
+
+            for role in roles:
+                if 'wos' in role:
+                    role_found = True
+            if role_found:
+                logger.info('User has wos role')
+                # get job information to meta database
+                select_q = "SELECT job_status, last_updated from user_job WHERE j_id=%s"
+                data = (job_id,)
+                cursor.execute(select_q, data)
+                if cursor.rowcount > 0:
+                    job_info = cursor.fetchone()
+                    job_json = {
+                        'job_status': job_info[0],
+                        'last_updated_time': job_info[1]
+                    }
+                    job_response = json.dumps(job_json, cls=DateEncoder)
+                    return jsonify(json.loads(job_response), 200)
+                else:
+                    logger.error("Invalid Job Id provided. Please check..")
+                    return jsonify({"Error": "Invalid Job Id"}, 400)
             else:
                 logger.info('User has guest role. He does not have access to WOS database.. '
                         'Please login with BTAA member institution, if you are part of it..')
