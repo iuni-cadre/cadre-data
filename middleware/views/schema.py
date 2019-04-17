@@ -121,7 +121,7 @@ class Query(graphene.ObjectType):
                                 interface_query += ' year=%s ' + operand
                                 value = value.strip()
                                 logger.info('Year: ' + value)
-                                value_array.append(value)
+                                value_array.append(str(value))
                                 # years.append(value)
                                 # year_operands.append(operand)
                         elif field == 'journalsName':
@@ -165,6 +165,7 @@ class Query(graphene.ObjectType):
                     cursor.execute(interface_query, value_array)
                     objects_list = []
                     if cursor.rowcount > 0:
+                        logger.info(str(cursor.rowcount))
                         result = cursor.fetchall()
                         logger.info(len(result))
                         # Convert query results to objects of key-value pairs
