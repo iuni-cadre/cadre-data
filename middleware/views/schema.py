@@ -106,11 +106,11 @@ class Query(graphene.ObjectType):
                     logger.info(q)
                     query_json = json.loads(q)
                     value_array = []
-                    interface_query = 'SELECT id, year, number, issue, pages, authors_full_name, authors_id_orcid, ' \
+                    interface_query = 'SELECT wos_id, year, number, issue, pages, authors_full_name, authors_id_orcid, ' \
                                       'authors_id_dais, authors_id_research, authors_prefix, authors_first_name, authors_middle_name, ' \
                                       'authors_last_name, authors_suffix, authors_initials, authors_display_name, authors_wos_name, ' \
                                       'authors_id_lang, authors_email, "references", issn, doi, title, journal_name, journal_abbrev, ' \
-                                      'journal_iso, abstract_paragraph FROM wos_core.interface_table WHERE '
+                                      'journal_iso, abstract_paragraphs FROM interface_table WHERE '
                     for item in query_json:
                         logger.info(item)
                         field = item['field']
