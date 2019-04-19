@@ -157,6 +157,7 @@ class Query(graphene.ObjectType):
                     # authors_dict.update({'authors': journals, 'operands': author_operands})
                     # wosids_dict.update({'wos_ids': wos_ids, 'operands': wos_id_operands})
 
+                    interface_query += ' LIMIT 10'
                     logger.info(interface_query)
                     logger.info(value_array)
                     cursor.execute(interface_query, value_array)
