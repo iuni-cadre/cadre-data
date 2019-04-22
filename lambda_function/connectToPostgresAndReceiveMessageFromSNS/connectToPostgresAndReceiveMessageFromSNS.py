@@ -121,12 +121,14 @@ def lambda_handler(event, context):
             operand = item['operand']
         if 's3_location' in item:
             print("S3 Location: " + item['s3_location'])
+        if 'field' in item:
+            field = item['field']
             if field == 'year':
                 if value is not None:
                     value = value.strip()
                     if len(value) == 4 and value.isdigit():
                         value = "'{}'".format(value)
-                        print(value)
+                        print("Year: " + value)
                         interface_query += ' year={} '.format(value) + operand
                         # years.append(value)
                         # year_operands.append(operand)
@@ -136,8 +138,8 @@ def lambda_handler(event, context):
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "'{}'".format(value)
-                    print(value)
-                    interface_query = interface_query + ' journal_tsv @@ to_tsquery ({}) '.format(value) + operand
+                    print("Journals Name: " + value)
+                    interface_query += ' journal_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # journals.append(value)
                     # journal_operands.append(operand)
             elif field == 'authorsFullName':
@@ -146,6 +148,7 @@ def lambda_handler(event, context):
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "'{}'".format(value)
+                    print("Authors Full Name: " + value)
                     interface_query += ' authors_full_name iLIKE {} '.format(value) + operand
                     # authors.append(value)
             elif field == 'title':
@@ -154,7 +157,7 @@ def lambda_handler(event, context):
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "'{}'".format(value)
-                    print(value)
+                    print("Title: " + value)
                     interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # authors.append(value)
                     # author_operands.append(operand)
@@ -205,7 +208,7 @@ def lambda_handler(event, context):
 
     # Closing the RDS database connection.
     cursor.close()
-    # Use this method to release the connection object and send back ti connection pool
+    # Use this method to release the connection object and send back to the connection pool
     connection_pool.putconn(connection)
     print("PostgreSQL connection pool for the RDS database is closed")
 
@@ -231,5 +234,3 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': message
     }
-
-
