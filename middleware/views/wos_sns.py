@@ -73,7 +73,7 @@ def submit_query():
                 # auto generated job id
                 job_id = str(uuid.uuid4())
                 logger.info(job_id)
-                s3_job_dir = job_id + '/'
+                s3_job_dir = username + '/'
                 s3_client = boto3.resource('s3',
                                            aws_access_key_id=util.config_reader.get_aws_access_key(),
                                            aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
