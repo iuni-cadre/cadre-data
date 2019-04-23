@@ -86,6 +86,7 @@ def submit_query():
                 root_bucket.put_object(Bucket=root_bucket_name, Key=s3_job_dir)
                 q.append({'job_id': job_id})
                 q.append({'s3_location': s3_location})
+                q.append({'username': username})
                 query_in_string = json.dumps(q)
                 logger.info(query_in_string)
                 sns_response = sns_client.publish(
