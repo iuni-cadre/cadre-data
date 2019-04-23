@@ -216,7 +216,7 @@ class Query(graphene.ObjectType):
         except (Exception, psycopg2.Error) as error:
             traceback.print_tb(error.__traceback__)
             logger.error('Error while connecting to PostgreSQL. Error is ' + str(error))
-            raise Exception('Error while connecting to PostgreSQL !')
+            raise Exception(str(error))
         finally:
             # Closing database connection.
             if connection:
