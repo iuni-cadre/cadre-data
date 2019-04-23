@@ -114,7 +114,7 @@ def submit_query():
             else:
                 logger.info('User has guest role. He does not have access to WOS database.. '
                         'Please login with BTAA member institution, if you are part of it..')
-                return jsonify({'error': 'User is not authorized to access data in WOS'}), 405
+                return jsonify({'error': 'User is not authorized to access data in WOS'}), 401
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
