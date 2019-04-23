@@ -203,20 +203,20 @@ class Query(graphene.ObjectType):
                 else:
                     logger.info('User has guest role. He does not have access to WOS database.. '
                             'Please login with BTAA member institution, if you are part of it..')
-                    return jsonify({'error': 'User is not authorized to access data in WOS'}), 401
+                    raise Exception('User is not authorized to access data in WOS !')
             elif status_code == 401:
                 logger.error('User is not authorized to access this endpoint !!!')
-                return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
+                raise Exception('User is not authorized to access this endpoint !')
             elif status_code == 500:
                 logger.error('Unable to contact login server to validate the token !!!')
-                return jsonify({'error': 'Unable to contact login server to validate the token'}), 500
+                raise Exception('Unable to contact login server to validate the token !')
             else:
                 logger.error('Something went wrong. Contact admins !!! ')
-                return jsonify({'error': 'Something went wrong. Contact admins'}), 500
+                raise Exception('Something went wrong. Contact admins !')
         except (Exception, psycopg2.Error) as error:
             traceback.print_tb(error.__traceback__)
             logger.error('Error while connecting to PostgreSQL. Error is ' + str(error))
-            return jsonify({'error': str(error)}), 500
+            raise Exception('Error while connecting to PostgreSQL !')
         finally:
             # Closing database connection.
             if connection:
