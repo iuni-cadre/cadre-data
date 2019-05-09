@@ -91,7 +91,6 @@ def submit_query():
                 logger.info(query_in_string)
                 sqs_response = sqs_client.send_message(
                     QueueUrl=queue_url,
-                    DelaySeconds=10,
                     MessageBody=query_in_string,
                     MessageGroupId='cadre'
                 )
