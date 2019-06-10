@@ -11,8 +11,8 @@ from datetime import date
 
 from flask import Blueprint, jsonify, request
 
-blueprint = Blueprint('wos_sns', __name__)
-logger = logging.getLogger('wos_sns')
+blueprint = Blueprint('wos_sqs', __name__)
+logger = logging.getLogger('wos_sqs')
 
 abspath = os.path.abspath(os.path.dirname(__file__))
 middleware = os.path.dirname(abspath)
@@ -31,7 +31,7 @@ class DateEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-@blueprint.route('/api/data/wos/publications-async1', methods=['POST'])
+@blueprint.route('/api/data/wos/publications-async', methods=['POST'])
 def submit_query():
     try:
         q = request.json.get('q')
@@ -52,12 +52,12 @@ def submit_query():
                                                 verify=False)
         status_code = validate_token_response.status_code
         if status_code == 200:
-            sns_client = boto3.client('sns',
+            sqs_client = boto3.client('sqs',
                     aws_access_key_id=util.config_reader.get_aws_access_key(),
                     aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
                     region_name=util.config_reader.get_aws_region())
 
-
+            queue_url = 'https://sqs.us-east-2.amazonaws.com/799597216943/cadre-job-queue.fifo'
 
             role_found = False
             response_json = validate_token_response.json()
@@ -89,14 +89,14 @@ def submit_query():
                 q.append({'username': username})
                 query_in_string = json.dumps(q)
                 logger.info(query_in_string)
-                sns_response = sns_client.publish(
-                    TopicArn=util.config_reader.get_aws_sns_wos_topic(),
-                    Message=query_in_string,
-                    MessageStructure='string'
+                sqs_response = sqs_client.send_message(
+                    QueueUrl=queue_url,
+                    MessageBody=query_in_string,
+                    MessageGroupId='cadre'
                 )
-                logger.info(sns_response)
-                if 'MessageId' in sns_response:
-                    message_id = sns_response['MessageId']
+                logger.info(sqs_response)
+                if 'MessageId' in sqs_response:
+                    message_id = sqs_response['MessageId']
                     logger.info(message_id)
                     # save job information to meta database
                     insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id, s3_location,job_status, created_on) VALUES (%s,%s,%s,%s,%s,clock_timestamp())"
@@ -110,8 +110,8 @@ def submit_query():
                                     'job_id': job_id,
                                     's3_location': s3_location}, 200)
                 else:
-                    logger.error("Error while publishing to sns")
-                    return jsonify({'error': 'error while publishing to SNS'}, 500)
+                    logger.error("Error while publishing to sqs")
+                    return jsonify({'error': 'error while publishing to SQS'}, 500)
             else:
                 logger.info('User has guest role. He does not have access to WOS database.. '
                         'Please login with BTAA member institution, if you are part of it..')
