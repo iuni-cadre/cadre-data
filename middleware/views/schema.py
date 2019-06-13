@@ -23,11 +23,6 @@ from util.db_util import wos_connection_pool
 import util.config_reader
 
 
-class User(ObjectType):
-    user_name = String()
-    token = String()
-
-
 class WOSInterfacetable(ObjectType):
     wos_id = String()
     year = String()
@@ -56,17 +51,6 @@ class WOSInterfacetable(ObjectType):
     journal_abbrev = String()
     journal_iso = String()
     abstract_paragraphs = String()
-
-
-class WOSFields(graphene.ObjectType):
-    year = String(required=True)
-    journal = String(required=True)
-
-
-class MAG(ObjectType):
-    id = ID()
-    requester = Field(User)
-    year = Int()
 
 
 class Query(graphene.ObjectType):
@@ -225,7 +209,7 @@ class Query(graphene.ObjectType):
                 logger.info("PostgreSQL connection pool is closed")
 
 
-schema = graphene.Schema(query=Query, types=[WOSInterfacetable])
+wos_schema = graphene.Schema(query=Query, types=[WOSInterfacetable])
 
 # class Query(graphene.ObjectType):
 #     requests = List(DataRequest, id=Int(required=True))

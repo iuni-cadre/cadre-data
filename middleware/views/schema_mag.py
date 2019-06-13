@@ -23,11 +23,6 @@ from util.db_util import mag_connection_pool
 import util.config_reader
 
 
-class User(ObjectType):
-    user_name = String()
-    token = String()
-
-
 class MAGInterfacetable(ObjectType):
     paper_id = String()
     author_id = String()
@@ -58,17 +53,6 @@ class MAGInterfacetable(ObjectType):
     journal_display_name = String()
     journal_issn = String()
     journal_publisher = String()
-
-
-class WOSFields(graphene.ObjectType):
-    year = String(required=True)
-    journal = String(required=True)
-
-
-class MAG(ObjectType):
-    id = ID()
-    requester = Field(User)
-    year = Int()
 
 
 class Query(graphene.ObjectType):
@@ -142,7 +126,7 @@ class Query(graphene.ObjectType):
                                 value = value.strip()
                                 value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
-                                logger.info('Authors Full Name: ' + value)
+                                logger.info('Authors Name: ' + value)
                                 value_array.append(value)
                                 # authors.append(value)
                         elif field == 'paperTitle':
@@ -151,7 +135,7 @@ class Query(graphene.ObjectType):
                                 value = value.strip()
                                 value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
-                                logger.info('Title: ' + value)
+                                logger.info('Paper Title: ' + value)
                                 value_array.append(value)
                         elif field == 'bookTitle':
                             if value is not None:
@@ -159,7 +143,7 @@ class Query(graphene.ObjectType):
                                 value = value.strip()
                                 value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
-                                logger.info('Title: ' + value)
+                                logger.info('Book Title: ' + value)
                                 value_array.append(value)
                         elif field == 'doi':
                             if value is not None:
@@ -167,7 +151,7 @@ class Query(graphene.ObjectType):
                                 value = value.strip()
                                 value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
-                                logger.info('Title: ' + value)
+                                logger.info('DOI: ' + value)
                                 value_array.append(value)
                         elif field == 'conferenceDisplayName':
                             if value is not None:
@@ -175,7 +159,7 @@ class Query(graphene.ObjectType):
                                 value = value.strip()
                                 value = value.replace(' ', '%')
                                 value = '%' + value.upper() + '%'
-                                logger.info('Title: ' + value)
+                                logger.info('Field: ' + value)
                                 value_array.append(value)
 
 
@@ -255,7 +239,7 @@ class Query(graphene.ObjectType):
                 logger.info("PostgreSQL connection pool is closed")
 
 
-schema = graphene.Schema(query=Query, types=[MAGInterfacetable])
+mag_schema = graphene.Schema(query=Query, types=[MAGInterfacetable])
 
 # class Query(graphene.ObjectType):
 #     requests = List(DataRequest, id=Int(required=True))
