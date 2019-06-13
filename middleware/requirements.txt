@@ -3,7 +3,7 @@ Flask==1.0.2
 Flask-Cors==3.0.7
 itsdangerous==1.1.0
 MarkupSafe==1.1.0
-psycopg2-binary==2.7.4
+psycopg2-binary==2.7.7
 setuptools==40.8.0
 wheel==0.33.1
 Werkzeug==0.14.1
