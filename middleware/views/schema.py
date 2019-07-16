@@ -99,7 +99,7 @@ class Query(graphene.ObjectType):
                         logger.info(item)
                         field = item['field']
                         value = item['value']
-                        operand = item['operand']
+                        operand = item['operator']
                         if field == 'year':
                             if value is not None:
                                 interface_query += ' year=%s ' + operand
