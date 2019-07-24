@@ -178,9 +178,9 @@ class Query(graphene.ObjectType):
                             wos.issn = row[20]
                             wos.doi = row[21]
                             wos.title = row[22]
-                            wos.journal_name = row[23]
-                            wos.journal_abbrev = row[24]
-                            wos.journal_iso = row[25]
+                            wos.journals_name = row[23]
+                            wos.journals_abbrev = row[24]
+                            wos.journals_iso = row[25]
                             wos.abstract_paragraphs = row[26]
                             objects_list.append(wos)
                     return objects_list
