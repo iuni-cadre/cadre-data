@@ -3,6 +3,7 @@ import os
 import sys
 
 from psycopg2 import pool
+from neo4j import GraphDatabase
 
 abspath = os.path.abspath(os.path.dirname(__file__))
 parent = os.path.dirname(abspath)
@@ -48,3 +49,5 @@ mag_connection_pool = pool.SimpleConnectionPool(1,
 
 if mag_connection_pool:
     logger.info("Connection pool for MAG database created successfully")
+
+mag_graph_driver = GraphDatabase.driver(util.config_reader.get_mag_graph_db_url(), auth=(util.config_reader.get_mag_graph_db_username(), util.config_reader.get_mag_graph_db_pwd()))

@@ -24,6 +24,7 @@ import util.config_reader
 from util.db_util import cadre_meta_connection_pool
 from util.db_util import wos_connection_pool
 from util.db_util import mag_connection_pool
+from util.db_util import mag_graph_driver
 
 
 class DateEncoder(json.JSONEncoder):
@@ -33,23 +34,23 @@ class DateEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def generate_wos_query(output_filter_string, query_json):
+def generate_wos_query(output_filter_string, filters):
     interface_query = 'SELECT ' + output_filter_string + ' FROM wos_core.wos_interface_table WHERE '
     value_array = []
-    for item in query_json:
+    for item in filters:
         logger.info(item)
         field = item['field']
         value = item['value']
-        operand = item['operator']
+        operation = item['operation']
         if field == 'year':
             if value is not None:
-                interface_query += ' year=%s ' + operand
+                interface_query += ' year=%s ' + operation
                 value = value.strip()
                 logger.info('Year: ' + value)
                 value_array.append(str(value))
         elif field == 'journalsName':
             if value is not None:
-                interface_query += ' journal_tsv @@ to_tsquery (%s) ' + operand
+                interface_query += ' journal_tsv @@ to_tsquery (%s) ' + operation
                 value = value.strip()
                 value = value.replace(' ', '%')
                 value = '%' + value.upper() + '%'
@@ -57,7 +58,7 @@ def generate_wos_query(output_filter_string, query_json):
                 value_array.append(value)
         elif field == 'authorsFullName':
             if value is not None:
-                interface_query += ' authors_full_name iLIKE %s ' + operand
+                interface_query += ' authors_full_name iLIKE %s ' + operation
                 value = value.strip()
                 value = value.replace(' ', '%')
                 value = '%' + value.upper() + '%'
@@ -65,7 +66,7 @@ def generate_wos_query(output_filter_string, query_json):
                 value_array.append(value)
         elif field == 'title':
             if value is not None:
-                interface_query += ' title_tsv @@ to_tsquery (%s) ' + operand
+                interface_query += ' title_tsv @@ to_tsquery (%s) ' + operation
                 value = value.strip()
                 value = value.replace(' ', '%')
                 value = '%' + value.upper() + '%'
@@ -75,6 +76,58 @@ def generate_wos_query(output_filter_string, query_json):
     interface_query = interface_query + 'LIMIT' + ' ' + '10'
     print("Query: " + interface_query)
     return interface_query, value_array
+
+
+def generate_wos_query_for_graph(output_filter_string, filters):
+    interface_query = 'SELECT ' + output_filter_string + ' FROM wos_core.wos_interface_table WHERE '
+    for item in filters:
+        if 'value' in item:
+            value = item['value']
+        if 'operator' in item:
+            operand = item['operand']
+        if 'field' in item:
+            field = item['field']
+            if field == 'year':
+                if value is not None:
+                    value = value.strip()
+                    if len(value) == 4 and value.isdigit():
+                        value = "'{}'".format(value)
+                        print("Year: " + value)
+                        interface_query += ' year={} '.format(value) + operand
+                        # years.append(value)
+                        # year_operands.append(operand)
+            elif field == 'journalsName':
+                if value is not None:
+                    value = value.strip()
+                    value = value.replace(' ', '%')
+                    value = '%' + value + '%'
+                    value = "'{}'".format(value)
+                    print("Journals Name: " + value)
+                    interface_query += ' journal_tsv @@ to_tsquery ({}) '.format(value) + operand
+                    # journals.append(value)
+                    # journal_operands.append(operand)
+            elif field == 'authorsFullName':
+                if value is not None:
+                    value = value.strip()
+                    value = value.replace(' ', '%')
+                    value = '%' + value + '%'
+                    value = "'{}'".format(value)
+                    print("Authors Full Name: " + value)
+                    interface_query += ' authors_full_name iLIKE {} '.format(value) + operand
+                    # authors.append(value)
+            elif field == 'title':
+                if value is not None:
+                    value = value.strip()
+                    value = value.replace(' ', '%')
+                    value = '%' + value + '%'
+                    value = "'{}'".format(value)
+                    print("Title: " + value)
+                    interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
+                    # authors.append(value)
+
+    interface_query = interface_query + 'LIMIT' + ' ' + '10'
+    print("Query: " + interface_query)
+    return interface_query
 
 
 def generate_mag_query(output_filter_string, query_json):
@@ -145,6 +198,57 @@ def generate_mag_query(output_filter_string, query_json):
     return interface_query, value_array
 
 
+def generate_mag_query_graph(output_filter_string, filters):
+    interface_query = 'SELECT ' + output_filter_string + ' FROM mag_core.mag_interface_table WHERE '
+    for item in filters:
+        if 'value' in item:
+            value = item['value']
+        if 'operand' in item:
+            operand = item['operand']
+        if 'field' in item:
+            field = item['field']
+            if field == 'year':
+                if value is not None:
+                    value = value.strip()
+                    if len(value) == 4 and value.isdigit():
+                        value = "'{}'".format(value)
+                        print("Year: " + value)
+                        interface_query += ' year={} '.format(value) + operand
+                        # years.append(value)
+                        # year_operands.append(operand)
+            elif field == 'journalsName':
+                if value is not None:
+                    value = value.strip()
+                    value = value.replace(' ', '%')
+                    value = '%' + value + '%'
+                    value = "'{}'".format(value)
+                    print("Journals Name: " + value)
+                    interface_query += ' journal_tsv @@ to_tsquery ({}) '.format(value) + operand
+                    # journals.append(value)
+                    # journal_operands.append(operand)
+            elif field == 'authorsFullName':
+                if value is not None:
+                    value = value.strip()
+                    value = value.replace(' ', '%')
+                    value = '%' + value + '%'
+                    value = "'{}'".format(value)
+                    print("Authors Full Name: " + value)
+                    interface_query += ' authors_full_name iLIKE {} '.format(value) + operand
+                    # authors.append(value)
+            elif field == 'title':
+                if value is not None:
+                    value = value.strip()
+                    value = value.replace(' ', '%')
+                    value = '%' + value + '%'
+                    value = "'{}'".format(value)
+                    print("Title: " + value)
+                    interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
+                    # authors.append(value)
+
+    interface_query = interface_query + 'LIMIT' + ' ' + '10'
+    print("Query: " + interface_query)
+    return interface_query
+
 # For the preview queries: call the database directly
 @blueprint.route('/api/data/publications-sync', methods=['POST'])
 def submit_query():
@@ -156,7 +260,6 @@ def submit_query():
         auth_token = request.headers.get('auth-token')
         username = request.headers.get('auth-username')
         output_filters_single = []
-        output_filters_network = []
         wos_connection = cadre_meta_connection_pool.getconn()
         wos_cursor = wos_connection.cursor()
         validata_token_args = {
@@ -176,7 +279,8 @@ def submit_query():
             response_json = validate_token_response.json()
             roles = response_json['roles']
             user_id = response_json['user_id']
-
+            network_query_type = 'other'
+            degree = 0
             for role in roles:
                 if 'wos' in role:
                     wos_role_found = True
@@ -186,32 +290,47 @@ def submit_query():
                     field = output_filed['field']
                     output_filters_single.append(field)
                 else:
-                    output_filters = output_filed['filters']
+                    network_query_type = output_filed['field']
+                    degree = int(output_filed['degree'])
+                    output_filters_single.append('paper_id')
+            output_filter_string = ",".join(output_filters_single)
             if dataset == 'wos':
                 if wos_role_found:
                     logger.info('User has wos role')
-                    wos_connection = wos_connection_pool.getconn()
-                    wos_cursor = wos_connection.cursor()
-                    interface_query, value_array = generate_wos_query(output_filters_single, request_json)
-                    wos_cursor.execute(interface_query, value_array)
-                    if wos_cursor.rowcount == 0:
-                        logger.info('The value of the row count is zero.')
-                    if wos_cursor.rowcount > 0:
-                        results = wos_cursor.fetchall()
-                        return jsonify(json.loads(results)), 200
+                    if network_query_type == 'citation':
+                        interface_query = generate_wos_query_for_graph(output_filter_string, filters)
+                    else:
+                        wos_connection = wos_connection_pool.getconn()
+                        wos_cursor = wos_connection.cursor()
+                        interface_query, value_array = generate_wos_query(output_filter_string, filters)
+                        wos_cursor.execute(interface_query, value_array)
+                        if wos_cursor.rowcount == 0:
+                            logger.info('The value of the row count is zero.')
+                        if wos_cursor.rowcount > 0:
+                            results = wos_cursor.fetchall()
+                            return jsonify(json.loads(results)), 200
                 else:
                     logger.error("User does not have access to WOS dataset..")
                     return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
             else:
-                mag_connection = mag_connection_pool.getconn()
-                mag_cursor = mag_connection.cursor()
-                interface_query, value_array = generate_mag_query(output_filters_single, request_json)
-                mag_cursor.execute(interface_query, value_array)
-                if mag_cursor.rowcount == 0:
-                    logger.info('The value of the row count is zero.')
-                if mag_cursor.rowcount > 0:
-                    results = mag_cursor.fetchall()
-                    return jsonify(json.loads(results)), 200
+                if network_query_type == 'citation':
+                    interface_query = generate_mag_query_graph(output_filter_string, filters)
+                    with mag_graph_driver.session() as session:
+                        neo4j_query = "CALL apoc.export.json.query(\"CALL apoc.load.jdbc('postgresql_url'," \
+                                      " ' " + interface_query + "') YIELD row MATCH (n:paper)<-[*2]-(m:paper)" \
+                                                                " WHERE n.paper_id = row.paper_id RETURN n, m\", '" + json_path + "')"
+                        result = session.run(neo4j_query)
+                        logger.info(result)
+                else:
+                    mag_connection = mag_connection_pool.getconn()
+                    mag_cursor = mag_connection.cursor()
+                    interface_query, value_array = generate_mag_query(output_filter_string, request_json)
+                    mag_cursor.execute(interface_query, value_array)
+                    if mag_cursor.rowcount == 0:
+                        logger.info('The value of the row count is zero.')
+                    if mag_cursor.rowcount > 0:
+                        results = mag_cursor.fetchall()
+                        return jsonify(json.loads(results)), 200
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
@@ -229,6 +348,7 @@ def submit_query():
         # Closing database connections.
         wos_cursor.close()
         mag_cursor.close()
+        mag_graph_driver.close()
         wos_connection_pool.putconn(wos_connection)
         mag_connection_pool.putconn(mag_connection)
 
