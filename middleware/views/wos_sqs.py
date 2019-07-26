@@ -91,8 +91,6 @@ def generate_mag_query(output_filter_string, query_json):
                 value = value.strip()
                 logger.info('Year: ' + value)
                 value_array.append(str(value))
-                # years.append(value)
-                # year_operands.append(operand)
         elif field == 'journalsName':
             if value is not None:
                 interface_query += ' journal_tsv @@ to_tsquery (%s) ' + operand
@@ -101,8 +99,6 @@ def generate_mag_query(output_filter_string, query_json):
                 value = '%' + value.upper() + '%'
                 logger.info('Journals Name: ' + value)
                 value_array.append(value)
-                # journals.append(value)
-                # journal_operands.append(operand)
         elif field == 'authorsName':
             if value is not None:
                 interface_query += ' authors_full_name iLIKE %s ' + operand
@@ -111,7 +107,6 @@ def generate_mag_query(output_filter_string, query_json):
                 value = '%' + value.upper() + '%'
                 logger.info('Authors Name: ' + value)
                 value_array.append(value)
-                # authors.append(value)
         elif field == 'paperTitle':
             if value is not None:
                 interface_query += ' title_tsv @@ to_tsquery (%s) ' + operand
@@ -154,11 +149,14 @@ def generate_mag_query(output_filter_string, query_json):
 @blueprint.route('/api/data/publications-sync', methods=['POST'])
 def submit_query():
     try:
-        q = request.json.get('q')
-        dataset = q['dataset']
-        output_filters = q['output_filter']
+        request_json = request.get_json()
+        dataset = request_json['dataset']
+        filters = request_json['filters']
+        output_fields = request_json['output']
         auth_token = request.headers.get('auth-token')
         username = request.headers.get('auth-username')
+        output_filters_single = []
+        output_filters_network = []
         wos_connection = cadre_meta_connection_pool.getconn()
         wos_cursor = wos_connection.cursor()
         validata_token_args = {
@@ -182,12 +180,19 @@ def submit_query():
             for role in roles:
                 if 'wos' in role:
                     wos_role_found = True
-            if dataset == 'WOS':
+            for output_filed in output_fields:
+                type = output_filed['type']
+                if type == 'single':
+                    field = output_filed['field']
+                    output_filters_single.append(field)
+                else:
+                    output_filters = output_filed['filters']
+            if dataset == 'wos':
                 if wos_role_found:
                     logger.info('User has wos role')
                     wos_connection = wos_connection_pool.getconn()
                     wos_cursor = wos_connection.cursor()
-                    interface_query, value_array = generate_wos_query(output_filters, q)
+                    interface_query, value_array = generate_wos_query(output_filters_single, request_json)
                     wos_cursor.execute(interface_query, value_array)
                     if wos_cursor.rowcount == 0:
                         logger.info('The value of the row count is zero.')
@@ -200,7 +205,7 @@ def submit_query():
             else:
                 mag_connection = mag_connection_pool.getconn()
                 mag_cursor = mag_connection.cursor()
-                interface_query, value_array = generate_mag_query(output_filters, q)
+                interface_query, value_array = generate_mag_query(output_filters_single, request_json)
                 mag_cursor.execute(interface_query, value_array)
                 if mag_cursor.rowcount == 0:
                     logger.info('The value of the row count is zero.')
