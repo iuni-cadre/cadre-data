@@ -249,7 +249,8 @@ def generate_mag_query_graph(output_filter_string, filters):
     print("Query: " + interface_query)
     return interface_query
 
-# For the preview queries: call the database directly
+# For the preview queries: call the database directly,
+# For preview, we will restrict degree to 1 or 2
 @blueprint.route('/api/data/publications-sync', methods=['POST'])
 def submit_query():
     try:
@@ -316,9 +317,9 @@ def submit_query():
                 if network_query_type == 'citation':
                     interface_query = generate_mag_query_graph(output_filter_string, filters)
                     with mag_graph_driver.session() as session:
-                        neo4j_query = "CALL apoc.export.json.query(\"CALL apoc.load.jdbc('postgresql_url'," \
+                        neo4j_query = "CALL apoc.load.jdbc('postgresql_url'," \
                                       " ' " + interface_query + "') YIELD row MATCH (n:paper)<-[*2]-(m:paper)" \
-                                                                " WHERE n.paper_id = row.paper_id RETURN n, m\", '" + json_path + "')"
+                                                                " WHERE n.paper_id = row.paper_id RETURN n, m"
                         result = session.run(neo4j_query)
                         logger.info(result)
                 else:
