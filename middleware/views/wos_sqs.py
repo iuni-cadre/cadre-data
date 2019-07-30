@@ -309,7 +309,12 @@ def submit_query_preview():
                             logger.info('The value of the row count is zero.')
                         if wos_cursor.rowcount > 0:
                             results = wos_cursor.fetchall()
-                            return jsonify(json.loads(results)), 200
+                            response = []
+                            for result in results:
+                                for i in range(len(output_filters_single)):
+                                    result_json = {output_filters_single[i]: result[i]}
+                                    response.append(result_json)
+                            return jsonify(json.loads(response)), 200
                 else:
                     logger.error("User does not have access to WOS dataset..")
                     return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
@@ -331,7 +336,12 @@ def submit_query_preview():
                         logger.info('The value of the row count is zero.')
                     if mag_cursor.rowcount > 0:
                         results = mag_cursor.fetchall()
-                        return jsonify(json.loads(results)), 200
+                        response = []
+                        for result in results:
+                            for i in range(len(output_filters_single)):
+                                result_json = {output_filters_single[i]: result[i]}
+                                response.append(result_json)
+                        return jsonify(json.loads(response)), 200
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
