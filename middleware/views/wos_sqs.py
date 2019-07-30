@@ -35,7 +35,7 @@ class DateEncoder(json.JSONEncoder):
 
 
 def generate_wos_query(output_filter_string, filters):
-    interface_query = 'SELECT ' + output_filter_string + ' FROM wos_core.wos_interface_table WHERE '
+    interface_query = 'SELECT ' + output_filter_string + ' FROM wos_core.interface_table WHERE '
     value_array = []
     for item in filters:
         logger.info(item)
@@ -79,7 +79,7 @@ def generate_wos_query(output_filter_string, filters):
 
 
 def generate_wos_query_for_graph(output_filter_string, filters):
-    interface_query = 'SELECT ' + output_filter_string + ' FROM wos_core.wos_interface_table WHERE '
+    interface_query = 'SELECT ' + output_filter_string + ' FROM wos_core.interface_table WHERE '
     for item in filters:
         if 'value' in item:
             value = item['value']
