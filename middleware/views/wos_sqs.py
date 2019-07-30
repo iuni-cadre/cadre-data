@@ -73,7 +73,7 @@ def generate_wos_query(output_filter_string, filters):
                 logger.info('Title: ' + value)
                 value_array.append(value)
 
-    interface_query = interface_query + 'LIMIT' + ' ' + '10'
+    interface_query = interface_query + ' LIMIT 10'
     print("Query: " + interface_query)
     return interface_query, value_array
 
@@ -125,7 +125,7 @@ def generate_wos_query_for_graph(output_filter_string, filters):
                     interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # authors.append(value)
 
-    interface_query = interface_query + 'LIMIT' + ' ' + '10'
+    interface_query = interface_query + ' LIMIT 10'
     print("Query: " + interface_query)
     return interface_query
 
@@ -193,7 +193,7 @@ def generate_mag_query(output_filter_string, query_json):
                 logger.info('Field: ' + value)
                 value_array.append(value)
 
-    interface_query = interface_query + 'LIMIT' + ' ' + '10'
+    interface_query = interface_query + ' LIMIT 10'
     print("Query: " + interface_query)
     return interface_query, value_array
 
@@ -245,7 +245,7 @@ def generate_mag_query_graph(output_filter_string, filters):
                     interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # authors.append(value)
 
-    interface_query = interface_query + 'LIMIT' + ' ' + '10'
+    interface_query = interface_query + ' LIMIT 10'
     print("Query: " + interface_query)
     return interface_query
 
