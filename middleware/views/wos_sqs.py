@@ -74,7 +74,8 @@ def generate_wos_query(output_filter_string, filters):
                 value_array.append(value)
 
     interface_query = interface_query + ' LIMIT 10'
-    print("Query: " + interface_query)
+    logger.info("Query: " + interface_query)
+    logger.info(value_array)
     return interface_query, value_array
 
 
@@ -304,7 +305,8 @@ def submit_query_preview():
                         wos_connection = wos_connection_pool.getconn()
                         wos_cursor = wos_connection.cursor()
                         interface_query, value_array = generate_wos_query(output_filter_string, filters)
-                        wos_cursor.execute(interface_query, value_array)
+                        value_tuple = tuple(value_array)
+                        wos_cursor.execute(interface_query, value_tuple)
                         if wos_cursor.rowcount == 0:
                             logger.info('The value of the row count is zero.')
                         if wos_cursor.rowcount > 0:
@@ -331,7 +333,8 @@ def submit_query_preview():
                     mag_connection = mag_connection_pool.getconn()
                     mag_cursor = mag_connection.cursor()
                     interface_query, value_array = generate_mag_query(output_filter_string, request_json)
-                    mag_cursor.execute(interface_query, value_array)
+                    value_tuple = tuple(value_array)
+                    mag_cursor.execute(interface_query, value_tuple)
                     if mag_cursor.rowcount == 0:
                         logger.info('The value of the row count is zero.')
                     if mag_cursor.rowcount > 0:
