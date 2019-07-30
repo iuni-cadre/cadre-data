@@ -252,7 +252,7 @@ def generate_mag_query_graph(output_filter_string, filters):
 # For the preview queries: call the database directly,
 # For preview, we will restrict degree to 1 or 2
 @blueprint.route('/api/data/publications-sync', methods=['POST'])
-def submit_query():
+def submit_query_preview():
     try:
         request_json = request.get_json()
         dataset = request_json['dataset']
