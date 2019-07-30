@@ -275,6 +275,10 @@ def submit_query_preview():
                                                 data=json.dumps(validata_token_args),
                                                 headers=headers,
                                                 verify=False)
+        wos_connection = wos_connection_pool.getconn()
+        wos_cursor = wos_connection.cursor()
+        mag_connection = mag_connection_pool.getconn()
+        mag_cursor = mag_connection.cursor()
         status_code = validate_token_response.status_code
         if status_code == 200:
             wos_role_found = False
@@ -302,8 +306,7 @@ def submit_query_preview():
                     if network_query_type == 'citation':
                         interface_query = generate_wos_query_for_graph(output_filter_string, filters)
                     else:
-                        wos_connection = wos_connection_pool.getconn()
-                        wos_cursor = wos_connection.cursor()
+
                         interface_query, value_array = generate_wos_query(output_filter_string, filters)
                         value_tuple = tuple(value_array)
                         wos_cursor.execute(interface_query, value_tuple)
@@ -316,7 +319,7 @@ def submit_query_preview():
                                 for i in range(len(output_filters_single)):
                                     result_json = {output_filters_single[i]: result[i]}
                                     response.append(result_json)
-                            return jsonify(json.loads(response)), 200
+                            return jsonify(json.dumps(response)), 200
                 else:
                     logger.error("User does not have access to WOS dataset..")
                     return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
@@ -330,8 +333,6 @@ def submit_query_preview():
                         result = session.run(neo4j_query)
                         logger.info(result)
                 else:
-                    mag_connection = mag_connection_pool.getconn()
-                    mag_cursor = mag_connection.cursor()
                     interface_query, value_array = generate_mag_query(output_filter_string, request_json)
                     value_tuple = tuple(value_array)
                     mag_cursor.execute(interface_query, value_tuple)
@@ -344,7 +345,7 @@ def submit_query_preview():
                             for i in range(len(output_filters_single)):
                                 result_json = {output_filters_single[i]: result[i]}
                                 response.append(result_json)
-                        return jsonify(json.loads(response)), 200
+                        return jsonify(json.dumps(response)), 200
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
