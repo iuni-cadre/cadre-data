@@ -85,7 +85,7 @@ def generate_wos_query_for_graph(output_filter_string, filters):
         if 'value' in item:
             value = item['value']
         if 'operator' in item:
-            operand = item['operand']
+            operand = item['operation']
         if 'field' in item:
             field = item['field']
             if field == 'year':
@@ -138,7 +138,7 @@ def generate_mag_query(output_filter_string, query_json):
         logger.info(item)
         field = item['field']
         value = item['value']
-        operand = item['operand']
+        operand = item['operation']
         if field == 'year':
             if value is not None:
                 interface_query += ' year=%s ' + operand
@@ -205,7 +205,7 @@ def generate_mag_query_graph(output_filter_string, filters):
         if 'value' in item:
             value = item['value']
         if 'operand' in item:
-            operand = item['operand']
+            operand = item['operation']
         if 'field' in item:
             field = item['field']
             if field == 'year':
