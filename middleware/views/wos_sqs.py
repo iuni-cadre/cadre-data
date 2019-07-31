@@ -354,7 +354,7 @@ def submit_query_preview():
                         result = session.run(neo4j_query)
                         logger.info(result)
                 else:
-                    interface_query, value_array = generate_mag_query(output_filter_string, request_json)
+                    interface_query, value_array = generate_mag_query(output_filter_string, filters)
                     value_tuple = tuple(value_array)
                     mag_cursor.execute(interface_query, value_tuple)
                     if mag_cursor.rowcount == 0:
