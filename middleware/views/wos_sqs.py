@@ -363,9 +363,11 @@ def submit_query_preview():
                         results = mag_cursor.fetchall()
                         response = []
                         for result in results:
+                            paper_response = []
                             for i in range(len(output_filters_single)):
                                 result_json = {output_filters_single[i]: result[i]}
-                                response.append(result_json)
+                                paper_response.append(result_json)
+                            response.append(paper_response)
                         return jsonify(json.dumps(response)), 200
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
