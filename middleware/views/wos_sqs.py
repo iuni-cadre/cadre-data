@@ -342,7 +342,7 @@ def submit_query_preview():
                                     result_json = {output_filters_single[i]: result[i]}
                                     paper_response.update(result_json)
                                 response.append(paper_response)
-                            return jsonify(json.dumps(response)), 200
+                            return jsonify(response), 200
                 else:
                     logger.error("User does not have access to WOS dataset..")
                     return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
@@ -370,7 +370,7 @@ def submit_query_preview():
                                 result_json = {output_filters_single[i]: result[i]}
                                 paper_response.update(result_json)
                             response.append(paper_response)
-                        return jsonify(json.dumps(response)), 200
+                        return jsonify(response), 200
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
