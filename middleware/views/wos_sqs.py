@@ -397,7 +397,7 @@ def submit_query_preview():
 @blueprint.route('/api/data/publications-async', methods=['POST'])
 def submit_query():
     try:
-        q = request.json.get('q')
+        request_json = request.get_json()
         auth_token = request.headers.get('auth-token')
         username = request.headers.get('auth-username')
         connection = cadre_meta_connection_pool.getconn()
@@ -447,10 +447,10 @@ def submit_query():
                 s3_location = 's3://' + bucket_job_id
                 logger.info(s3_location)
                 root_bucket.put_object(Bucket=root_bucket_name, Key=s3_job_dir)
-                q.append({'job_id': job_id})
-                q.append({'s3_location': s3_location})
-                q.append({'username': username})
-                query_in_string = json.dumps(q)
+                request_json['job_id'] = job_id
+                request_json['s3_location'] = s3_location
+                request_json['username'] = username
+                query_in_string = json.dumps(request_json)
                 logger.info(query_in_string)
                 sqs_response = sqs_client.send_message(
                     QueueUrl=queue_url,
