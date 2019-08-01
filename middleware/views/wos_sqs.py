@@ -97,7 +97,7 @@ def generate_wos_query_for_graph(output_filter_string, filters):
                         interface_query += ' year={} '.format(value) + operand
                         # years.append(value)
                         # year_operands.append(operand)
-            elif field == 'journalsName':
+            elif field == 'journals_name':
                 if value is not None:
                     value = value.strip()
                     value = value.replace(' ', '%')
@@ -107,7 +107,7 @@ def generate_wos_query_for_graph(output_filter_string, filters):
                     interface_query += ' journal_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # journals.append(value)
                     # journal_operands.append(operand)
-            elif field == 'authorsFullName':
+            elif field == 'authors_full_name':
                 if value is not None:
                     value = value.strip()
                     value = value.replace(' ', '%')
@@ -325,6 +325,7 @@ def submit_query_preview():
                 if wos_role_found:
                     logger.info('User has wos role')
                     if network_query_type == 'citation':
+                        output_filter_string = 'paper_id'
                         interface_query = generate_wos_query_for_graph(output_filter_string, filters)
                     else:
 
