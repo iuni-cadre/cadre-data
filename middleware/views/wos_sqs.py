@@ -317,9 +317,14 @@ def submit_query_preview():
                     field = output_filed['field']
                     output_filters_single.append(field)
                 else:
+                    output_filters_single.append('paper_id')
+            # check if network option is selected
+            for output_filed in output_fields:
+                type = output_filed['type']
+                if type == 'network':
                     network_query_type = output_filed['field']
                     degree = int(output_filed['degree'])
-                    output_filters_single.append('paper_id')
+
             output_filter_string = ",".join(output_filters_single)
             if dataset == 'wos':
                 if wos_role_found:
