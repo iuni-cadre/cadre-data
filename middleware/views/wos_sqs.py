@@ -450,7 +450,7 @@ def submit_query():
                     message_id = sqs_response['MessageId']
                     logger.info(message_id)
                     # save job information to meta database
-                    insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id,job_status, created_on) VALUES (%s,%s,%s,%s,%s,clock_timestamp())"
+                    insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id,job_status, created_on) VALUES (%s,%s,%s,%s,clock_timestamp())"
 
                     data = (job_id, user_id, message_id, 'SUBMITTED')
                     logger.info(data)
