@@ -204,7 +204,7 @@ def generate_mag_query_graph(output_filter_string, filters):
     for item in filters:
         if 'value' in item:
             value = item['value']
-        if 'operand' in item:
+        if 'operation' in item:
             operand = item['operation']
         if 'field' in item:
             field = item['field']
