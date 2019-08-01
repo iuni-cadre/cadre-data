@@ -48,7 +48,7 @@ def generate_wos_query(output_filter_string, filters):
                 value = value.strip()
                 logger.info('Year: ' + value)
                 value_array.append(str(value))
-        elif field == 'journalsName':
+        elif field == 'journals_name':
             if value is not None:
                 interface_query += ' journal_tsv @@ to_tsquery (%s) ' + operation
                 value = value.strip()
@@ -56,7 +56,7 @@ def generate_wos_query(output_filter_string, filters):
                 value = '%' + value.upper() + '%'
                 logger.info('Journals Name: ' + value)
                 value_array.append(value)
-        elif field == 'authorsFullName':
+        elif field == 'authors_full_name':
             if value is not None:
                 interface_query += ' authors_full_name iLIKE %s ' + operation
                 value = value.strip()
