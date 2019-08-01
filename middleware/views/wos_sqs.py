@@ -325,10 +325,9 @@ def submit_query_preview():
                 if wos_role_found:
                     logger.info('User has wos role')
                     if network_query_type == 'citation':
-                        output_filter_string = 'paper_id'
+                        output_filter_string = 'paper_reference_id'
                         interface_query = generate_wos_query_for_graph(output_filter_string, filters)
                     else:
-
                         interface_query, value_array = generate_wos_query(output_filter_string, filters)
                         value_tuple = tuple(value_array)
                         wos_cursor.execute(interface_query, value_tuple)
@@ -349,6 +348,7 @@ def submit_query_preview():
                     return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
             else:
                 if network_query_type == 'citation':
+                    output_filter_string = 'paper_id'
                     interface_query = generate_mag_query_graph(output_filter_string, filters)
                     with mag_graph_driver.session() as session:
                         neo4j_query = "CALL apoc.load.jdbc('postgresql_url'," \
