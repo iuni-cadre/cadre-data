@@ -212,9 +212,9 @@ def generate_mag_query_graph(output_filter_string, filters):
                 if value is not None:
                     value = value.strip()
                     if len(value) == 4 and value.isdigit():
-                        value = "'{}'".format(value)
+                        value = "\\'{}\\'".format(value)
                         print("Year: " + value)
-                        interface_query += ' year=\'{}\' '.format(value) + operand
+                        interface_query += ' year={} '.format(value) + operand
                         # years.append(value)
                         # year_operands.append(operand)
             elif field == 'journal_display_name':
@@ -222,9 +222,9 @@ def generate_mag_query_graph(output_filter_string, filters):
                     value = value.strip()
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
-                    value = "'{}'".format(value)
+                    value = "\\'{}\\'".format(value)
                     print("Journals Name: " + value)
-                    interface_query += ' journal_display_name iLIKE \'{}\' '.format(value) + operand
+                    interface_query += ' journal_display_name iLIKE {} '.format(value) + operand
                     # journals.append(value)
                     # journal_operands.append(operand)
             elif field == 'authors_full_name':
@@ -232,42 +232,45 @@ def generate_mag_query_graph(output_filter_string, filters):
                     value = value.strip()
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
-                    value = "'{}'".format(value)
+                    value = "\\'{}\\'".format(value)
                     print("Authors Full Name: " + value)
-                    interface_query += ' authors_full_name iLIKE \'{}\' '.format(value) + operand
+                    interface_query += ' authors_full_name iLIKE {} '.format(value) + operand
                     # authors.append(value)
             elif field == 'paper_title':
                 if value is not None:
                     value = value.strip()
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
-                    value = "'{}'".format(value)
+                    value = "\\'{}\\'".format(value)
                     print("Title: " + value)
-                    interface_query += ' title_tsv @@ to_tsquery (\'{}\') '.format(value) + operand
+                    interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # authors.append(value)
             elif field == 'book_title':
                 if value is not None:
                     value = value.strip()
                     value = value.replace(' ', '%')
                     value = '%' + value.upper() + '%'
+                    value = "\\'{}\\'".format(value)
                     logger.info('Book Title: ' + value)
-                    interface_query += ' book_title iLIKE \'{}\' '.format(value) + operand
+                    interface_query += ' book_title iLIKE {} '.format(value) + operand
             elif field == 'doi':
                 if value is not None:
                     value = value.strip()
                     value = value.replace(' ', '%')
                     value = '%' + value.upper() + '%'
+                    value = "\\'{}\\'".format(value)
                     logger.info('DOI: ' + value)
-                    interface_query += ' doi iLIKE \'{}\' '.format(value) + operand
+                    interface_query += ' doi iLIKE {} '.format(value) + operand
             elif field == 'conference_display_name':
                 if value is not None:
                     value = value.strip()
                     value = value.replace(' ', '%')
                     value = '%' + value.upper() + '%'
+                    value = "\\'{}\\'".format(value)
                     logger.info('conferenceDisplayName: ' + value)
-                    interface_query += ' conference_display_name iLIKE \'{}\' '.format(value) + operand
+                    interface_query += ' conference_display_name iLIKE {} '.format(value) + operand
 
-    interface_query = interface_query + ' LIMIT 10'
+    interface_query = interface_query + ' LIMIT 5'
     print("Query: " + interface_query)
     return interface_query
 
@@ -357,11 +360,21 @@ def submit_query_preview():
                     interface_query = generate_mag_query_graph(output_filter_string, filters)
                     with mag_graph_driver.session() as session:
                         neo4j_query = "CALL apoc.load.jdbc('postgresql_url'," \
-                                      " '" + interface_query + "') YIELD row MATCH (n:paper)<-[*2]-(m:paper)" \
-                                                                " WHERE n.paper_id = row.paper_id RETURN n, m"
+                                      " '" + interface_query +\
+                                      "') YIELD row MATCH (n:paper)<-[*2]-(m:paper)" \
+                                      " WHERE n.paper_id = row.paper_id RETURN n, m"
                         logger.info(neo4j_query)
-                        result = session.run(neo4j_query)
-                        logger.info(result)
+                        for record in session.run(neo4j_query):
+                            n = record['n']
+                            m = record['m']
+                            n_items = n.items()
+                            m_items = m.items()
+                            for key, value in n_items:
+                                logger.info(key)
+                                logger.info(value)
+                            for key, value in m_items:
+                                logger.info(key)
+                                logger.info(value)
                 else:
                     interface_query, value_array = generate_mag_query(output_filter_string, filters)
                     value_tuple = tuple(value_array)
