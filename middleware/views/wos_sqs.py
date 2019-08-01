@@ -329,7 +329,7 @@ def submit_query_preview():
             if dataset == 'wos':
                 if wos_role_found:
                     logger.info('User has wos role')
-                    if network_query_type == 'citation':
+                    if network_query_type == 'citations':
                         output_filter_string = 'paper_reference_id'
                         interface_query = generate_wos_query_for_graph(output_filter_string, filters)
                     else:
@@ -352,7 +352,7 @@ def submit_query_preview():
                     logger.error("User does not have access to WOS dataset..")
                     return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
             else:
-                if network_query_type == 'citation':
+                if network_query_type == 'citations':
                     output_filter_string = 'paper_id'
                     interface_query = generate_mag_query_graph(output_filter_string, filters)
                     with mag_graph_driver.session() as session:
