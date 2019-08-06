@@ -14,7 +14,6 @@ import util.config_reader
 
 logger = logging.getLogger(__name__)
 
-
 wos_connection_pool = pool.SimpleConnectionPool(1,
                                                 20,
                                                 host=util.config_reader.get_wos_db_hostname(),

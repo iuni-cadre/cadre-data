@@ -469,9 +469,9 @@ def submit_query():
                     message_id = sqs_response['MessageId']
                     logger.info(message_id)
                     # save job information to meta database
-                    insert_q = "INSERT INTO user_job(j_id, user_id, sns_message_id,job_status, created_on) VALUES (%s,%s,%s,%s,clock_timestamp())"
+                    insert_q = "INSERT INTO user_job(job_id, user_id, message_id,job_status, type, created_on) VALUES (%s,%s,%s,%s,%s,clock_timestamp())"
 
-                    data = (job_id, user_id, message_id, 'SUBMITTED')
+                    data = (job_id, user_id, message_id, 'QUERY', 'SUBMITTED')
                     logger.info(data)
                     cursor.execute(insert_q, data)
                     connection.commit()
@@ -537,7 +537,7 @@ def job_status(job_id):
             if role_found:
                 logger.info('User has wos role')
                 # get job information to meta database
-                select_q = "SELECT job_status, last_updated from user_job WHERE j_id=%s"
+                select_q = "SELECT job_status, last_updated from user_job WHERE job_id=%s"
                 data = (job_id,)
                 cursor.execute(select_q, data)
                 if cursor.rowcount > 0:
