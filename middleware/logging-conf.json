@@ -12,7 +12,7 @@
             "class": "logging.FileHandler",
             "level": "DEBUG",
             "formatter": "simple",
-            "filename": "cadre_logging.log",
+            "filename": "cadre_data.log",
             "encoding": "utf8"
         }
     },
