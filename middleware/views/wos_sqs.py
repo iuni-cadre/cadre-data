@@ -357,6 +357,7 @@ def submit_query_preview():
             else:
                 if network_query_type == 'citations':
                     output_filter_string = 'paper_id'
+                    output_filters_single.append('paper_citation_count')
                     interface_query = generate_mag_query_graph(output_filter_string, filters)
                     with mag_graph_driver.session() as session:
                         neo4j_query = "CALL apoc.load.jdbc('postgresql_url'," \
