@@ -275,7 +275,7 @@ def generate_mag_query_graph(output_filter_string, filters):
     return interface_query
 
 # For the preview queries: call the database directly,
-# For preview, we will restrict degree to 1 or 2
+# Preview query for graph queries will be same as sql query with citation counts
 @blueprint.route('/api/data/publications-sync', methods=['POST'])
 def submit_query_preview():
     try:
@@ -319,8 +319,6 @@ def submit_query_preview():
                 if type == 'single':
                     field = output_filed['field']
                     output_filters_single.append(field)
-                else:
-                    output_filters_single.append('paper_id')
             # check if network option is selected
             for output_filed in output_fields:
                 type = output_filed['type']
@@ -333,57 +331,15 @@ def submit_query_preview():
                 if wos_role_found:
                     logger.info('User has wos role')
                     if network_query_type == 'citations':
-                        output_filter_string = 'paper_reference_id'
-                        interface_query = generate_wos_query_for_graph(output_filter_string, filters)
-                    else:
-                        interface_query, value_array = generate_wos_query(output_filter_string, filters)
-                        value_tuple = tuple(value_array)
-                        wos_cursor.execute(interface_query, value_tuple)
-                        if wos_cursor.rowcount == 0:
-                            logger.info('The value of the row count is zero.')
-                        if wos_cursor.rowcount > 0:
-                            results = wos_cursor.fetchall()
-                            response = []
-                            for result in results:
-                                paper_response = {}
-                                for i in range(len(output_filters_single)):
-                                    result_json = {output_filters_single[i]: result[i]}
-                                    paper_response.update(result_json)
-                                response.append(paper_response)
-                            return jsonify(response), 200
-                else:
-                    logger.error("User does not have access to WOS dataset..")
-                    return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
-            else:
-                if network_query_type == 'citations':
-                    output_filter_string = 'paper_id'
-                    output_filters_single.append('paper_citation_count')
-                    interface_query = generate_mag_query_graph(output_filter_string, filters)
-                    with mag_graph_driver.session() as session:
-                        neo4j_query = "CALL apoc.load.jdbc('postgresql_url'," \
-                                      " '" + interface_query +\
-                                      "') YIELD row MATCH (n:paper)<-[*2]-(m:paper)" \
-                                      " WHERE n.paper_id = row.paper_id RETURN n, m"
-                        logger.info(neo4j_query)
-                        for record in session.run(neo4j_query):
-                            n = record['n']
-                            m = record['m']
-                            n_items = n.items()
-                            m_items = m.items()
-                            for key, value in n_items:
-                                logger.info(key)
-                                logger.info(value)
-                            for key, value in m_items:
-                                logger.info(key)
-                                logger.info(value)
-                else:
-                    interface_query, value_array = generate_mag_query(output_filter_string, filters)
+                        output_filters_single.append('paper_reference_id')
+                        output_filter_string = ",".join(output_filters_single)
+                    interface_query, value_array = generate_wos_query(output_filter_string, filters)
                     value_tuple = tuple(value_array)
-                    mag_cursor.execute(interface_query, value_tuple)
-                    if mag_cursor.rowcount == 0:
+                    wos_cursor.execute(interface_query, value_tuple)
+                    if wos_cursor.rowcount == 0:
                         logger.info('The value of the row count is zero.')
-                    if mag_cursor.rowcount > 0:
-                        results = mag_cursor.fetchall()
+                    if wos_cursor.rowcount > 0:
+                        results = wos_cursor.fetchall()
                         response = []
                         for result in results:
                             paper_response = {}
@@ -392,6 +348,28 @@ def submit_query_preview():
                                 paper_response.update(result_json)
                             response.append(paper_response)
                         return jsonify(response), 200
+                else:
+                    logger.error("User does not have access to WOS dataset..")
+                    return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
+            else:
+                if network_query_type == 'citations':
+                    output_filters_single.append('paper_citation_count')
+                    output_filter_string = ",".join(output_filters_single)
+                interface_query, value_array = generate_mag_query(output_filter_string, filters)
+                value_tuple = tuple(value_array)
+                mag_cursor.execute(interface_query, value_tuple)
+                if mag_cursor.rowcount == 0:
+                    logger.info('The value of the row count is zero.')
+                if mag_cursor.rowcount > 0:
+                    results = mag_cursor.fetchall()
+                    response = []
+                    for result in results:
+                        paper_response = {}
+                        for i in range(len(output_filters_single)):
+                            result_json = {output_filters_single[i]: result[i]}
+                            paper_response.update(result_json)
+                        response.append(paper_response)
+                    return jsonify(response), 200
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
