@@ -133,7 +133,7 @@ def generate_wos_query_for_graph(output_filter_string, filters):
 
 def generate_mag_query(output_filter_string, query_json):
     value_array = []
-    interface_query = 'SELECT ' + output_filter_string + ' FROM mag_core.mag_interface_table WHERE'
+    interface_query = 'SELECT ' + output_filter_string + ' FROM mag_core.final_mag_interface_table WHERE'
     for item in query_json:
         logger.info(item)
         field = item['field']
@@ -200,7 +200,7 @@ def generate_mag_query(output_filter_string, query_json):
 
 
 def generate_mag_query_graph(output_filter_string, filters):
-    interface_query = 'SELECT ' + output_filter_string + ' FROM mag_core.mag_interface_table WHERE'
+    interface_query = 'SELECT ' + output_filter_string + ' FROM mag_core.final_mag_interface_table WHERE'
     for item in filters:
         if 'value' in item:
             value = item['value']
