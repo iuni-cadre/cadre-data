@@ -195,7 +195,7 @@ def generate_mag_query(output_filter_string, query_json):
                 value_array.append(value)
 
     interface_query = interface_query + ' LIMIT 10'
-    print("Query: " + interface_query)
+    logger.info("Query: " + interface_query)
     return interface_query, value_array
 
 
@@ -357,6 +357,7 @@ def submit_query_preview():
                     output_filter_string = ",".join(output_filters_single)
                 interface_query, value_array = generate_mag_query(output_filter_string, filters)
                 value_tuple = tuple(value_array)
+                logger.info(interface_query)
                 mag_cursor.execute(interface_query, value_tuple)
                 if mag_cursor.rowcount == 0:
                     logger.info('The value of the row count is zero.')
