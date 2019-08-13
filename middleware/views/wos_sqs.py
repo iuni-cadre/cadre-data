@@ -425,20 +425,48 @@ def submit_query():
             response_json = validate_token_response.json()
             roles = response_json['roles']
             user_id = response_json['user_id']
+            dataset = request_json['dataset']
             logger.info('User authorized !!!')
 
             for role in roles:
                 if 'wos' in role:
                     role_found = True
-            if role_found:
-                logger.info('User has wos role')
-                # auto generated job id
-                job_id = str(uuid.uuid4())
-                logger.info(job_id)
-                request_json['job_id'] = job_id
-                request_json['username'] = username
-                query_in_string = json.dumps(request_json)
-                logger.info(query_in_string)
+            job_id = str(uuid.uuid4())
+            logger.info(job_id)
+            request_json['job_id'] = job_id
+            request_json['username'] = username
+            query_in_string = json.dumps(request_json)
+            logger.info(query_in_string)
+            if dataset == 'wos':
+                if role_found:
+                    logger.info('User has wos role')
+                    sqs_response = sqs_client.send_message(
+                        QueueUrl=queue_url,
+                        MessageBody=query_in_string,
+                        MessageGroupId='cadre'
+                    )
+                    logger.info(sqs_response)
+                    if 'MessageId' in sqs_response:
+                        message_id = sqs_response['MessageId']
+                        logger.info(message_id)
+                        # save job information to meta database
+                        insert_q = "INSERT INTO user_job(job_id, user_id, message_id,job_status, type, started_on) VALUES (%s,%s,%s,%s,%s,clock_timestamp())"
+
+                        data = (job_id, user_id, message_id,  'SUBMITTED', 'QUERY')
+                        logger.info(data)
+                        cursor.execute(insert_q, data)
+                        connection.commit()
+
+                        return jsonify({'message_id': message_id,
+                                        'job_id': job_id}, 200)
+                    else:
+                        logger.error("Error while publishing to sqs")
+                        return jsonify({'error': 'error while publishing to SQS'}, 500)
+                else:
+                    logger.info('User has guest role. He does not have access to WOS database.. '
+                            'Please login with BTAA member institution, if you are part of it..')
+                    return jsonify({'error': 'User is not authorized to access data in WOS'}), 401
+            else:
                 sqs_response = sqs_client.send_message(
                     QueueUrl=queue_url,
                     MessageBody=query_in_string,
@@ -451,7 +479,7 @@ def submit_query():
                     # save job information to meta database
                     insert_q = "INSERT INTO user_job(job_id, user_id, message_id,job_status, type, started_on) VALUES (%s,%s,%s,%s,%s,clock_timestamp())"
 
-                    data = (job_id, user_id, message_id,  'SUBMITTED', 'QUERY')
+                    data = (job_id, user_id, message_id, 'SUBMITTED', 'QUERY')
                     logger.info(data)
                     cursor.execute(insert_q, data)
                     connection.commit()
@@ -461,10 +489,6 @@ def submit_query():
                 else:
                     logger.error("Error while publishing to sqs")
                     return jsonify({'error': 'error while publishing to SQS'}, 500)
-            else:
-                logger.info('User has guest role. He does not have access to WOS database.. '
-                        'Please login with BTAA member institution, if you are part of it..')
-                return jsonify({'error': 'User is not authorized to access data in WOS'}), 401
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
