@@ -286,8 +286,6 @@ def submit_query_preview():
         auth_token = request.headers.get('auth-token')
         username = request.headers.get('auth-username')
         output_filters_single = []
-        wos_connection = cadre_meta_connection_pool.getconn()
-        wos_cursor = wos_connection.cursor()
         validata_token_args = {
             'username': username
         }
