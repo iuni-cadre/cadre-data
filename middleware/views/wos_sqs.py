@@ -93,7 +93,7 @@ def generate_wos_query_for_graph(output_filter_string, filters):
                     value = value.strip()
                     if len(value) == 4 and value.isdigit():
                         value = "'{}'".format(value)
-                        print("Year: " + value)
+                        logger.info("Year: " + value)
                         interface_query += ' year={} '.format(value) + operand
                         # years.append(value)
                         # year_operands.append(operand)
@@ -103,7 +103,7 @@ def generate_wos_query_for_graph(output_filter_string, filters):
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "'{}'".format(value)
-                    print("Journals Name: " + value)
+                    logger.info("Journals Name: " + value)
                     interface_query += ' journal_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # journals.append(value)
                     # journal_operands.append(operand)
@@ -113,7 +113,7 @@ def generate_wos_query_for_graph(output_filter_string, filters):
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "'{}'".format(value)
-                    print("Authors Full Name: " + value)
+                    logger.info("Authors Full Name: " + value)
                     interface_query += ' authors_full_name iLIKE {} '.format(value) + operand
                     # authors.append(value)
             elif field == 'title':
@@ -122,12 +122,12 @@ def generate_wos_query_for_graph(output_filter_string, filters):
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "'{}'".format(value)
-                    print("Title: " + value)
+                    logger.info("Title: " + value)
                     interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # authors.append(value)
 
     interface_query = interface_query + ' LIMIT 10'
-    print("Query: " + interface_query)
+    logger.info("Query: " + interface_query)
     return interface_query
 
 
@@ -153,9 +153,9 @@ def generate_mag_query(output_filter_string, query_json):
                 value = '%' + value.upper() + '%'
                 logger.info('Journals Name: ' + value)
                 value_array.append(value)
-        elif field == 'authors_full_name':
+        elif field == 'authors_display_name':
             if value is not None:
-                interface_query += ' authors_full_name iLIKE %s ' + operand
+                interface_query += ' authors_display_name iLIKE %s ' + operand
                 value = value.strip()
                 value = value.replace(' ', '%')
                 value = '%' + value.upper() + '%'
@@ -169,13 +169,13 @@ def generate_mag_query(output_filter_string, query_json):
                 value = '%' + value.upper() + '%'
                 logger.info('Paper Title: ' + value)
                 value_array.append(value)
-        elif field == 'book_title':
+        elif field == 'paper_abstract':
             if value is not None:
-                interface_query += ' book_title iLIKE %s ' + operand
+                interface_query += ' paper_abstract_tsv @@ to_tsquery (%s) ' + operand
                 value = value.strip()
                 value = value.replace(' ', '%')
                 value = '%' + value.upper() + '%'
-                logger.info('Book Title: ' + value)
+                logger.info('Paper Abstract: ' + value)
                 value_array.append(value)
         elif field == 'doi':
             if value is not None:
@@ -191,7 +191,7 @@ def generate_mag_query(output_filter_string, query_json):
                 value = value.strip()
                 value = value.replace(' ', '%')
                 value = '%' + value.upper() + '%'
-                logger.info('conferenceDisplayName: ' + value)
+                logger.info('Conference Display Name: ' + value)
                 value_array.append(value)
 
     interface_query = interface_query + ' LIMIT 10'
@@ -213,7 +213,7 @@ def generate_mag_query_graph(output_filter_string, filters):
                     value = value.strip()
                     if len(value) == 4 and value.isdigit():
                         value = "\\'{}\\'".format(value)
-                        print("Year: " + value)
+                        logger.info("Year: " + value)
                         interface_query += ' year={} '.format(value) + operand
                         # years.append(value)
                         # year_operands.append(operand)
@@ -223,18 +223,18 @@ def generate_mag_query_graph(output_filter_string, filters):
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "\\'{}\\'".format(value)
-                    print("Journals Name: " + value)
+                    logger.info("Journals Name: " + value)
                     interface_query += ' journal_display_name iLIKE {} '.format(value) + operand
                     # journals.append(value)
                     # journal_operands.append(operand)
-            elif field == 'authors_full_name':
+            elif field == 'authors_display_name':
                 if value is not None:
                     value = value.strip()
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "\\'{}\\'".format(value)
-                    print("Authors Full Name: " + value)
-                    interface_query += ' authors_full_name iLIKE {} '.format(value) + operand
+                    logger.info("Authors Name: " + value)
+                    interface_query += ' authors_display_name iLIKE {} '.format(value) + operand
                     # authors.append(value)
             elif field == 'paper_title':
                 if value is not None:
@@ -242,17 +242,17 @@ def generate_mag_query_graph(output_filter_string, filters):
                     value = value.replace(' ', '%')
                     value = '%' + value + '%'
                     value = "\\'{}\\'".format(value)
-                    print("Title: " + value)
-                    interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
+                    logger.info("Paper Title: " + value)
+                    interface_query += ' paper_title_tsv @@ to_tsquery ({}) '.format(value) + operand
                     # authors.append(value)
-            elif field == 'book_title':
+            elif field == 'paper_abstract':
                 if value is not None:
                     value = value.strip()
                     value = value.replace(' ', '%')
                     value = '%' + value.upper() + '%'
                     value = "\\'{}\\'".format(value)
-                    logger.info('Book Title: ' + value)
-                    interface_query += ' book_title iLIKE {} '.format(value) + operand
+                    logger.info('Paper Abstract: ' + value)
+                    interface_query += ' paper_abstract_tsv @@ to_tsquery ({}) '.format(value) + operand
             elif field == 'doi':
                 if value is not None:
                     value = value.strip()
@@ -267,7 +267,7 @@ def generate_mag_query_graph(output_filter_string, filters):
                     value = value.replace(' ', '%')
                     value = '%' + value.upper() + '%'
                     value = "\\'{}\\'".format(value)
-                    logger.info('conferenceDisplayName: ' + value)
+                    logger.info('Conference Display Name: ' + value)
                     interface_query += ' conference_display_name iLIKE {} '.format(value) + operand
 
     interface_query = interface_query + ' LIMIT 5'
