@@ -359,16 +359,16 @@ def submit_query_preview():
                 mag_cursor.execute(interface_query, value_tuple)
                 if mag_cursor.rowcount == 0:
                     logger.info('The value of the row count is zero.')
+                response = []
                 if mag_cursor.rowcount > 0:
                     results = mag_cursor.fetchall()
-                    response = []
                     for result in results:
                         paper_response = {}
                         for i in range(len(output_filters_single)):
                             result_json = {output_filters_single[i]: result[i]}
                             paper_response.update(result_json)
                         response.append(paper_response)
-                    return jsonify(response), 200
+                return jsonify(response), 200
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
