@@ -336,16 +336,16 @@ def submit_query_preview():
                     wos_cursor.execute(interface_query, value_tuple)
                     if wos_cursor.rowcount == 0:
                         logger.info('The value of the row count is zero.')
+                    response = []
                     if wos_cursor.rowcount > 0:
                         results = wos_cursor.fetchall()
-                        response = []
                         for result in results:
                             paper_response = {}
                             for i in range(len(output_filters_single)):
                                 result_json = {output_filters_single[i]: result[i]}
                                 paper_response.update(result_json)
                             response.append(paper_response)
-                        return jsonify(response), 200
+                    return jsonify(response), 200
                 else:
                     logger.error("User does not have access to WOS dataset..")
                     return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
