@@ -24,7 +24,6 @@ import util.config_reader
 from util.db_util import cadre_meta_connection_pool
 from util.db_util import wos_connection_pool
 from util.db_util import mag_connection_pool
-from util.db_util import mag_graph_driver
 
 
 class DateEncoder(json.JSONEncoder):
@@ -386,7 +385,6 @@ def submit_query_preview():
         # Closing database connections.
         wos_cursor.close()
         mag_cursor.close()
-        mag_graph_driver.close()
         wos_connection_pool.putconn(wos_connection)
         mag_connection_pool.putconn(mag_connection)
 
