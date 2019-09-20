@@ -13,7 +13,6 @@ import util.config_reader
 
 logger = logging.getLogger(__name__)
 
-
 wos_connection_pool = pool.SimpleConnectionPool(1,
                                                 20,
                                                 host=util.config_reader.get_wos_db_hostname(),
@@ -36,3 +35,15 @@ cadre_meta_connection_pool = pool.SimpleConnectionPool(1,
 
 if cadre_meta_connection_pool:
     logger.info("Connection pool for cadre meta database created successfully")
+
+
+mag_connection_pool = pool.SimpleConnectionPool(1,
+                                                20,
+                                                host=util.config_reader.get_mag_db_hostname(),
+                                                database=util.config_reader.get_mag_db_name(),
+                                                user=util.config_reader.get_mag_db_username(),
+                                                password=util.config_reader.get_mag_db_pwd(),
+                                                port=util.config_reader.get_mag_db_port())
+
+if mag_connection_pool:
+    logger.info("Connection pool for MAG database created successfully")

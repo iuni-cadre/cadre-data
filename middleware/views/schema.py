@@ -23,11 +23,6 @@ from util.db_util import wos_connection_pool
 import util.config_reader
 
 
-class User(ObjectType):
-    user_name = String()
-    token = String()
-
-
 class WOSInterfacetable(ObjectType):
     wos_id = String()
     year = String()
@@ -56,17 +51,6 @@ class WOSInterfacetable(ObjectType):
     journal_abbrev = String()
     journal_iso = String()
     abstract_paragraphs = String()
-
-
-class WOSFields(graphene.ObjectType):
-    year = String(required=True)
-    journal = String(required=True)
-
-
-class MAG(ObjectType):
-    id = ID()
-    requester = Field(User)
-    year = Int()
 
 
 class Query(graphene.ObjectType):
@@ -109,13 +93,13 @@ class Query(graphene.ObjectType):
                     interface_query = 'SELECT wos_id, year, number, issue, pages, authors_full_name, authors_id_orcid, ' \
                                       'authors_id_dais, authors_id_research, authors_prefix, authors_first_name, authors_middle_name, ' \
                                       'authors_last_name, authors_suffix, authors_initials, authors_display_name, authors_wos_name, ' \
-                                      'authors_id_lang, authors_email, "references", issn, doi, title, journal_name, journal_abbrev, ' \
-                                      'journal_iso, abstract_paragraphs FROM interface_table WHERE '
+                                      'authors_id_lang, authors_email, "references", issn, doi, title, journals_name, journals_abbrev, ' \
+                                      'journals_iso, abstract_paragraphs FROM wos_core.interface_table WHERE '
                     for item in query_json:
                         logger.info(item)
                         field = item['field']
                         value = item['value']
-                        operand = item['operand']
+                        operand = item['operator']
                         if field == 'year':
                             if value is not None:
                                 interface_query += ' year=%s ' + operand
@@ -194,9 +178,9 @@ class Query(graphene.ObjectType):
                             wos.issn = row[20]
                             wos.doi = row[21]
                             wos.title = row[22]
-                            wos.journal_name = row[23]
-                            wos.journal_abbrev = row[24]
-                            wos.journal_iso = row[25]
+                            wos.journals_name = row[23]
+                            wos.journals_abbrev = row[24]
+                            wos.journals_iso = row[25]
                             wos.abstract_paragraphs = row[26]
                             objects_list.append(wos)
                     return objects_list
@@ -225,7 +209,7 @@ class Query(graphene.ObjectType):
                 logger.info("PostgreSQL connection pool is closed")
 
 
-schema = graphene.Schema(query=Query, types=[WOSInterfacetable])
+wos_schema = graphene.Schema(query=Query, types=[WOSInterfacetable])
 
 # class Query(graphene.ObjectType):
 #     requests = List(DataRequest, id=Int(required=True))

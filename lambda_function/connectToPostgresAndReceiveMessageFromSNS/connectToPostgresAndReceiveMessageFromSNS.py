@@ -92,7 +92,7 @@ def lambda_handler(event, context):
     connection1 = connection_pool1.getconn()
     cursor1 = connection1.cursor()
     print("Job ID: " + job_id)
-    updateStatement = "UPDATE user_job SET job_status = 'RUNNING', last_updated = CURRENT_TIMESTAMP WHERE j_id = (%s)"
+    updateStatement = "UPDATE user_job SET job_status = 'RUNNING', last_updated = CURRENT_TIMESTAMP WHERE job_id = (%s)"
     # Execute the SQL Query
     cursor1.execute(updateStatement, (job_id,))
     print(connection1.get_dsn_parameters())
@@ -192,7 +192,7 @@ def lambda_handler(event, context):
         connection2 = connection_pool1.getconn()
         cursor2 = connection2.cursor()
         print("Job ID: " + job_id)
-        updateStatement = "UPDATE user_job SET job_status = 'FAILED', last_updated = CURRENT_TIMESTAMP WHERE j_id = (%s)"
+        updateStatement = "UPDATE user_job SET job_status = 'FAILED', last_updated = CURRENT_TIMESTAMP WHERE job_id = (%s)"
         # Execute the SQL Query
         cursor2.execute(updateStatement, (job_id,))
         print(connection2.get_dsn_parameters())
@@ -218,7 +218,7 @@ def lambda_handler(event, context):
     connection3 = connection_pool1.getconn()
     cursor3 = connection3.cursor()
     print("Job ID: " + job_id)
-    updateStatement = "UPDATE user_job SET job_status = 'COMPLETED', last_updated = CURRENT_TIMESTAMP WHERE j_id = (%s)"
+    updateStatement = "UPDATE user_job SET job_status = 'COMPLETED', last_updated = CURRENT_TIMESTAMP WHERE job_id = (%s)"
     # Execute the SQL Query
     cursor3.execute(updateStatement, (job_id,))
     print(connection3.get_dsn_parameters())

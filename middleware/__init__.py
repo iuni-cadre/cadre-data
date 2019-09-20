@@ -17,16 +17,22 @@ middleware = cadre + '/middleware'
 sys.path.append(cadre)
 
 import util.config_reader
-from middleware.views.schema import schema
+from middleware.views.schema import wos_schema
+from middleware.views.schema_mag import mag_schema
 
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = util.config_reader.get_app_secret()
 
 view_func = GraphQLView.as_view(
-    '/api/data/wos-graphql/publication', schema=schema, graphiql=True)
+    '/api/data/wos-graphql/publication', schema=wos_schema, graphiql=True)
 
 app.add_url_rule('/api/data/wos-graphql/publication', view_func=view_func)
+
+view_func1 = GraphQLView.as_view(
+    '/api/data/mag-graphql/publication', schema=mag_schema, graphiql=True)
+
+app.add_url_rule('/api/data/mag-graphql/publication', view_func=view_func)
 
 # If applicable, delete the existing log file to generate a fresh log file during each execution
 logfile_path = abspath + "/cadre_data_logging.log"
@@ -43,9 +49,6 @@ logging.config.dictConfig(config_dict)
 logger = logging.getLogger(__name__)
 logger.info('Completed configuring logger()!')
 
-from .views import wos, mag, cadre_data, wos_sns, wos_sqs
-app.register_blueprint(wos.blueprint)
-app.register_blueprint(mag.blueprint)
+from .views import cadre_data, wos_sqs
 app.register_blueprint(cadre_data.blueprint)
-app.register_blueprint(wos_sns.blueprint)
 app.register_blueprint(wos_sqs.blueprint)
