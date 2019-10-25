@@ -415,7 +415,7 @@ def submit_query():
                     aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
                     region_name=util.config_reader.get_aws_region())
 
-            queue_url = 'https://sqs.us-east-2.amazonaws.com/799597216943/cadre-job-queue.fifo'
+            queue_url = util.config_reader.get_aws_queue_url()
 
             role_found = False
             response_json = validate_token_response.json()
