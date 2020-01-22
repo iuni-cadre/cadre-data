@@ -36,6 +36,6 @@ logging.config.dictConfig(config_dict)
 logger = logging.getLogger(__name__)
 logger.info('Completed configuring logger()!')
 
-from .views import cadre_data, wos_sqs
+from .views import cadre_data, data_api
 app.register_blueprint(cadre_data.blueprint)
-app.register_blueprint(wos_sqs.blueprint)
+app.register_blueprint(data_api.blueprint)

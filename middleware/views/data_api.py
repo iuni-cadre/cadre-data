@@ -47,13 +47,13 @@ def generate_wos_query(output_filter_string, filters):
                 value = value.strip()
                 logger.info('Year: ' + value)
                 value_array.append(str(value))
-        elif field == 'journals_name':
+        elif field == 'journal_name':
             if value is not None:
                 interface_query += ' journal_tsv @@ to_tsquery (%s) ' + operation
                 value = value.strip()
                 value = value.replace(' ', '%')
                 value = '%' + value.upper() + '%'
-                logger.info('Journals Name: ' + value)
+                logger.info('Journal Name: ' + value)
                 value_array.append(value)
         elif field == 'authors_full_name':
             if value is not None:
@@ -76,58 +76,6 @@ def generate_wos_query(output_filter_string, filters):
     logger.info("Query: " + interface_query)
     logger.info(value_array)
     return interface_query, value_array
-
-
-def generate_wos_query_for_graph(output_filter_string, filters):
-    interface_query = 'SELECT ' + output_filter_string + ' FROM wos_core.interface_table WHERE '
-    for item in filters:
-        if 'value' in item:
-            value = item['value']
-        if 'operator' in item:
-            operand = item['operation']
-        if 'field' in item:
-            field = item['field']
-            if field == 'year':
-                if value is not None:
-                    value = value.strip()
-                    if len(value) == 4 and value.isdigit():
-                        value = "'{}'".format(value)
-                        logger.info("Year: " + value)
-                        interface_query += ' year={} '.format(value) + operand
-                        # years.append(value)
-                        # year_operands.append(operand)
-            elif field == 'journals_name':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value + '%'
-                    value = "'{}'".format(value)
-                    logger.info("Journals Name: " + value)
-                    interface_query += ' journal_tsv @@ to_tsquery ({}) '.format(value) + operand
-                    # journals.append(value)
-                    # journal_operands.append(operand)
-            elif field == 'authors_full_name':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value + '%'
-                    value = "'{}'".format(value)
-                    logger.info("Authors Full Name: " + value)
-                    interface_query += ' authors_full_name iLIKE {} '.format(value) + operand
-                    # authors.append(value)
-            elif field == 'title':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value + '%'
-                    value = "'{}'".format(value)
-                    logger.info("Title: " + value)
-                    interface_query += ' title_tsv @@ to_tsquery ({}) '.format(value) + operand
-                    # authors.append(value)
-
-    interface_query = interface_query + ' LIMIT 10'
-    logger.info("Query: " + interface_query)
-    return interface_query
 
 
 def generate_mag_query(output_filter_string, query_json):
@@ -198,81 +146,6 @@ def generate_mag_query(output_filter_string, query_json):
     return interface_query, value_array
 
 
-def generate_mag_query_graph(output_filter_string, filters):
-    interface_query = 'SELECT ' + output_filter_string + ' FROM mag_core.final_mag_interface_table WHERE'
-    for item in filters:
-        if 'value' in item:
-            value = item['value']
-        if 'operation' in item:
-            operand = item['operation']
-        if 'field' in item:
-            field = item['field']
-            if field == 'year':
-                if value is not None:
-                    value = value.strip()
-                    if len(value) == 4 and value.isdigit():
-                        value = "\\'{}\\'".format(value)
-                        logger.info("Year: " + value)
-                        interface_query += ' year={} '.format(value) + operand
-                        # years.append(value)
-                        # year_operands.append(operand)
-            elif field == 'journal_display_name':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value + '%'
-                    value = "\\'{}\\'".format(value)
-                    logger.info("Journals Name: " + value)
-                    interface_query += ' journal_display_name iLIKE {} '.format(value) + operand
-                    # journals.append(value)
-                    # journal_operands.append(operand)
-            elif field == 'authors_display_name':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value + '%'
-                    value = "\\'{}\\'".format(value)
-                    logger.info("Authors Name: " + value)
-                    interface_query += ' authors_display_name iLIKE {} '.format(value) + operand
-                    # authors.append(value)
-            elif field == 'paper_title':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value + '%'
-                    value = "\\'{}\\'".format(value)
-                    logger.info("Paper Title: " + value)
-                    interface_query += ' paper_title_tsv @@ to_tsquery ({}) '.format(value) + operand
-                    # authors.append(value)
-            elif field == 'paper_abstract':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value.upper() + '%'
-                    value = "\\'{}\\'".format(value)
-                    logger.info('Paper Abstract: ' + value)
-                    interface_query += ' paper_abstract_tsv @@ to_tsquery ({}) '.format(value) + operand
-            elif field == 'doi':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value.upper() + '%'
-                    value = "\\'{}\\'".format(value)
-                    logger.info('DOI: ' + value)
-                    interface_query += ' doi iLIKE {} '.format(value) + operand
-            elif field == 'conference_display_name':
-                if value is not None:
-                    value = value.strip()
-                    value = value.replace(' ', '%')
-                    value = '%' + value.upper() + '%'
-                    value = "\\'{}\\'".format(value)
-                    logger.info('Conference Display Name: ' + value)
-                    interface_query += ' conference_display_name iLIKE {} '.format(value) + operand
-
-    interface_query = interface_query + ' LIMIT 5'
-    print("Query: " + interface_query)
-    return interface_query
-
 # For the preview queries: call the database directly,
 # Preview query for graph queries will be same as sql query with citation counts
 @blueprint.route('/api/data/publications-sync', methods=['POST'])
@@ -327,8 +200,8 @@ def submit_query_preview():
             if dataset == 'wos':
                 if wos_role_found:
                     logger.info('User has wos role')
-                    if network_query_type == 'citations':
-                        output_filters_single.append('paper_reference_id')
+                    if network_query_type == 'references':
+                        output_filters_single.append('reference_count')
                         output_filter_string = ",".join(output_filters_single)
                     interface_query, value_array = generate_wos_query(output_filter_string, filters)
                     value_tuple = tuple(value_array)
@@ -485,76 +358,6 @@ def submit_query():
                 else:
                     logger.error("Error while publishing to sqs")
                     return jsonify({'error': 'error while publishing to SQS'}, 500)
-        elif status_code == 401:
-            logger.error('User is not authorized to access this endpoint !!!')
-            return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
-        elif status_code == 500:
-            logger.error('Unable to contact login server to validate the token !!!')
-            return jsonify({'error': 'Unable to contact login server to validate the token'}), 500
-        else:
-            logger.error('Something went wrong. Contact admins !!! ')
-            return jsonify({'error': 'Something went wrong. Contact admins'}), 500
-    except (Exception, psycopg2.Error) as error:
-        traceback.print_tb(error.__traceback__)
-        logger.error('Error while connecting to cadre meta database. Error is ' + str(error))
-        return jsonify({'error': str(error)}), 500
-    finally:
-        # Closing database connection.
-        cursor.close()
-        # Use this method to release the connection object and send back ti connection pool
-        cadre_meta_connection_pool.putconn(connection)
-        print("PostgreSQL connection pool is closed")
-
-
-@blueprint.route('/api/data/job-status/<string:job_id>', methods=['POST'])
-def job_status(job_id):
-    try:
-        auth_token = request.headers.get('auth-token')
-        username = request.headers.get('auth-username')
-        connection = cadre_meta_connection_pool.getconn()
-        cursor = connection.cursor()
-        validata_token_args = {
-            'username': username
-        }
-        headers = {
-            'auth-token': auth_token,
-            'Content-Type': 'application/json'
-        }
-        validate_token_response = requests.post(util.config_reader.get_cadre_token_ep(),
-                                                data=json.dumps(validata_token_args),
-                                                headers=headers,
-                                                verify=False)
-        status_code = validate_token_response.status_code
-        if status_code == 200:
-            role_found = False
-            response_json = validate_token_response.json()
-            roles = response_json['roles']
-            logger.info('User authorized !!!')
-
-            for role in roles:
-                if 'wos' in role:
-                    role_found = True
-            if role_found:
-                logger.info('User has wos role')
-                # get job information to meta database
-                select_q = "SELECT job_status, last_updated from user_job WHERE job_id=%s"
-                data = (job_id,)
-                cursor.execute(select_q, data)
-                if cursor.rowcount > 0:
-                    job_info = cursor.fetchone()
-                    job_json = {
-                        'job_status': job_info[0],
-                        'last_updated_time': job_info[1]
-                    }
-                    job_response = json.dumps(job_json, cls=DateEncoder)
-                    return jsonify(json.loads(job_response), 200)
-                else:
-                    logger.error("Invalid Job Id provided. Please check..")
-                    return jsonify({"Error": "Invalid Job Id"}, 400)
-            else:
-                logger.info('User has guest role. He does not have access to WOS database.. '
-                        'Please login with BTAA member institution, if you are part of it..')
-                return jsonify({'error': 'User is not authorized to access data in WOS'}), 405
         elif status_code == 401:
             logger.error('User is not authorized to access this endpoint !!!')
             return jsonify({'error': 'User is not authorized to access this endpoint'}), 401
