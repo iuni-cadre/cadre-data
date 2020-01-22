@@ -310,6 +310,7 @@ def submit_query():
             logger.info(job_id)
             request_json['job_id'] = job_id
             request_json['username'] = username
+            request_json['user_id'] = user_id
             query_in_string = json.dumps(request_json)
             logger.info(query_in_string)
             if dataset == 'wos':
