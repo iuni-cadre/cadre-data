@@ -11,8 +11,8 @@ from datetime import date
 
 from flask import Blueprint, jsonify, request
 
-blueprint = Blueprint('wos_sqs', __name__)
-logger = logging.getLogger('wos_sqs')
+blueprint = Blueprint('data_api', __name__)
+logger = logging.getLogger('data_api')
 
 abspath = os.path.abspath(os.path.dirname(__file__))
 middleware = os.path.dirname(abspath)
