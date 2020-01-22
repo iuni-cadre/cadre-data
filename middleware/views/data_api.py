@@ -187,8 +187,12 @@ def submit_query_preview():
             for output_filed in output_fields:
                 type = output_filed['type']
                 if type == 'single':
-                    field = output_filed['field']
-                    output_filters_single.append(field)
+                    if field == 'wos_id':
+                        output_filters_single.append('id')
+                    elif field == 'references':
+                        output_filters_single.append("\\'references\\'")
+                    else:
+                        output_filters_single.append(field)
             # check if network option is selected
             for output_filed in output_fields:
                 type = output_filed['type']
