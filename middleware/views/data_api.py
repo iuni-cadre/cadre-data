@@ -184,9 +184,11 @@ def submit_query_preview():
             for role in roles:
                 if 'wos' in role:
                     wos_role_found = True
+            logger.info(output_fields)
             for output_filed in output_fields:
                 type = output_filed['type']
                 if type == 'single':
+                    field = output_filed['field']
                     if field == 'wos_id':
                         output_filters_single.append('id')
                     elif field == 'references':
