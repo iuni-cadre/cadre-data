@@ -301,6 +301,7 @@ def submit_query():
             roles = response_json['roles']
             user_id = response_json['user_id']
             dataset = request_json['dataset']
+
             logger.info('User authorized !!!')
 
             for role in roles:
@@ -308,6 +309,10 @@ def submit_query():
                     role_found = True
             job_id = str(uuid.uuid4())
             logger.info(job_id)
+            if 'job_name' in response_json:
+                job_name = request_json['job_name']
+            else:
+                job_name = job_id
             request_json['job_id'] = job_id
             request_json['username'] = username
             request_json['user_id'] = user_id
@@ -326,9 +331,9 @@ def submit_query():
                         message_id = sqs_response['MessageId']
                         logger.info(message_id)
                         # save job information to meta database
-                        insert_q = "INSERT INTO user_job(job_id, user_id, message_id,job_status, type, dataset, started_on) VALUES (%s,%s,%s,%s,%s,%s,clock_timestamp())"
+                        insert_q = "INSERT INTO user_job(job_id, user_id, job_name, message_id,job_status, type, dataset, started_on) VALUES (%s,%s,%s,%s,%s,%s,%s,clock_timestamp())"
 
-                        data = (job_id, user_id, message_id,  'SUBMITTED', 'QUERY', 'WOS')
+                        data = (job_id, user_id, job_name, message_id,  'SUBMITTED', 'QUERY', 'WOS')
                         logger.info(data)
                         cursor.execute(insert_q, data)
                         connection.commit()
@@ -353,9 +358,9 @@ def submit_query():
                     message_id = sqs_response['MessageId']
                     logger.info(message_id)
                     # save job information to meta database
-                    insert_q = "INSERT INTO user_job(job_id, user_id, message_id,job_status, type, dataset, started_on) VALUES (%s,%s,%s,%s,%s,%s,clock_timestamp())"
+                    insert_q = "INSERT INTO user_job(job_id, user_id, job_name, message_id,job_status, type, dataset, started_on) VALUES (%s,%s,%s,%s,%s,%s,%s,clock_timestamp())"
 
-                    data = (job_id, user_id, message_id, 'SUBMITTED', 'QUERY', 'MAG')
+                    data = (job_id, user_id, job_name, message_id, 'SUBMITTED', 'QUERY', 'MAG')
                     logger.info(data)
                     cursor.execute(insert_q, data)
                     connection.commit()
