@@ -307,7 +307,7 @@ def submit_query():
                     role_found = True
             job_id = str(uuid.uuid4())
             logger.info(job_id)
-            if 'job_name' in response_json:
+            if 'job_name' in request_json:
                 job_name = request_json['job_name']
             else:
                 job_name = job_id
