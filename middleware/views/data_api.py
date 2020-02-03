@@ -47,7 +47,7 @@ def generate_wos_query(output_filter_string, filters):
                 value = value.strip()
                 logger.info('Year: ' + value)
                 value_array.append(str(value))
-        elif field == 'journals_name':
+        elif field == 'journals_name' or field == 'journal_name':
             if value is not None:
                 interface_query += ' journal_tsv @@ to_tsquery (%s) ' + operation
                 value = value.strip()
