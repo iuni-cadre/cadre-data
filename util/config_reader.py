@@ -234,6 +234,16 @@ def get_aws_queue_url():
         raise Exception('Unable to find cadre.config file !')
 
 
+def get_janus_queue_url():
+    try:
+        config = get_cadre_config()
+        queue_url = config['AWS']['janus_queue_url']
+        return queue_url
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        logger.error('Unable to find cadre.config file. Make sure you have cadre.config inside conf directory !')
+        raise Exception('Unable to find cadre.config file !')
+
 def get_mag_db_hostname():
     try:
         config = get_cadre_config()

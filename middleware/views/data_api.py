@@ -292,7 +292,8 @@ def submit_query():
                     aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
                     region_name=util.config_reader.get_aws_region())
 
-            queue_url = util.config_reader.get_aws_queue_url()
+            wos_queue_url = util.config_reader.get_aws_queue_url()
+            janus_queue_url = util.config_reader.get_janus_queue_url()
 
             role_found = False
             response_json = validate_token_response.json()
@@ -321,7 +322,7 @@ def submit_query():
                 if role_found:
                     logger.info('User has wos role')
                     sqs_response = sqs_client.send_message(
-                        QueueUrl=queue_url,
+                        QueueUrl=wos_queue_url,
                         MessageBody=query_in_string,
                         MessageGroupId='cadre'
                     )
@@ -348,7 +349,7 @@ def submit_query():
                     return jsonify({'error': 'User is not authorized to access data in WOS'}), 401
             else:
                 sqs_response = sqs_client.send_message(
-                    QueueUrl=queue_url,
+                    QueueUrl=janus_queue_url,
                     MessageBody=query_in_string,
                     MessageGroupId='cadre'
                 )
