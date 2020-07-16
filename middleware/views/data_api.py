@@ -77,6 +77,50 @@ def generate_wos_query(output_filter_string, filters):
     logger.info(value_array)
     return interface_query, value_array
 
+def generate_wos_2019_query(output_filter_string, filters):
+    interface_query = 'SELECT ' + output_filter_string + ' FROM wos19.interface_tabl19 WHERE '
+    value_array = []
+    for item in filters:
+        logger.info(item)
+        field = item['field']
+        value = item['value']
+        operation = item['operation']
+        if field == 'year':
+            if value is not None:
+                interface_query += ' year=%s ' + operation
+                value = value.strip()
+                logger.info('Year: ' + value)
+                value_array.append(str(value))
+        elif field == 'journals_name' or field == 'journal_name':
+            if value is not None:
+                interface_query += ' journal_tsv @@ to_tsquery (%s) ' + operation
+                value = value.strip()
+                value = value.replace(' ', '%')
+                value = '%' + value.upper() + '%'
+                logger.info('Journal Name: ' + value)
+                value_array.append(value)
+        elif field == 'authors_full_name':
+            if value is not None:
+                interface_query += ' authors_full_name iLIKE %s ' + operation
+                value = value.strip()
+                value = value.replace(' ', '%')
+                value = '%' + value.upper() + '%'
+                logger.info('Authors Full Name: ' + value)
+                value_array.append(value)
+        elif field == 'title':
+            if value is not None:
+                interface_query += ' title_tsv @@ to_tsquery (%s) ' + operation
+                value = value.strip()
+                value = value.replace(' ', '%')
+                value = '%' + value.upper() + '%'
+                logger.info('Title: ' + value)
+                value_array.append(value)
+
+    interface_query = interface_query + ' LIMIT 10'
+    logger.info("Query: " + interface_query)
+    logger.info(value_array)
+    return interface_query, value_array
+
 
 def generate_mag_query(output_filter_string, query_json):
     value_array = []
@@ -225,6 +269,30 @@ def submit_query_preview():
                 else:
                     logger.error("User does not have access to WOS dataset..")
                     return jsonify({'error': 'User does not have access to WOS dataset'}, 401)
+            elif dataset == 'wos_2019':
+                if wos_role_found:
+                    logger.info('User has wos role')
+                    if network_query_type == 'references':
+                        output_filters_single.append('reference_count')
+                        output_filter_string = ",".join(output_filters_single)
+                    interface_query, value_array = generate_wos_2019_query(output_filter_string, filters)
+                    value_tuple = tuple(value_array)
+                    wos_cursor.execute(interface_query, value_tuple)
+                    if wos_cursor.rowcount == 0:
+                        logger.info('The value of the row count is zero.')
+                    response = []
+                    if wos_cursor.rowcount > 0:
+                        results = wos_cursor.fetchall()
+                        for result in results:
+                            paper_response = {}
+                            for i in range(len(output_filters_single)):
+                                result_json = {output_filters_single[i]: result[i]}
+                                paper_response.update(result_json)
+                            response.append(paper_response)
+                    return jsonify(response), 200
+                else:
+                    logger.error("User does not have access to WOS 2019 dataset..")
+                    return jsonify({'error': 'User does not have access to WOS 2019 dataset'}, 401)
             else:
                 if network_query_type == 'citations':
                     output_filters_single.append('paper_citation_count')
@@ -347,6 +415,35 @@ def submit_query():
                     logger.info('User has guest role. He does not have access to WOS database.. '
                             'Please login with BTAA member institution, if you are part of it..')
                     return jsonify({'error': 'User is not authorized to access data in WOS'}), 401
+            elif dataset == 'wos_2019':
+                if role_found:
+                    logger.info('User has wos role')
+                    sqs_response = sqs_client.send_message(
+                        QueueUrl=wos_queue_url,
+                        MessageBody=query_in_string,
+                        MessageGroupId='cadre'
+                    )
+                    logger.info(sqs_response)
+                    if 'MessageId' in sqs_response:
+                        message_id = sqs_response['MessageId']
+                        logger.info(message_id)
+                        # save job information to meta database
+                        insert_q = "INSERT INTO user_job(job_id, user_id, name, message_id,job_status, type, dataset, started_on) VALUES (%s,%s,%s,%s,%s,%s,%s,clock_timestamp())"
+
+                        data = (job_id, user_id, job_name, message_id,  'SUBMITTED', 'QUERY', 'WOS')
+                        logger.info(data)
+                        cursor.execute(insert_q, data)
+                        connection.commit()
+
+                        return jsonify({'message_id': message_id,
+                                        'job_id': job_id}, 200)
+                    else:
+                        logger.error("Error while publishing to sqs")
+                        return jsonify({'error': 'error while publishing to SQS'}, 500)
+                else:
+                    logger.info('User has guest role. He does not have access to WOS 2019 database.. '
+                            'Please login with BTAA member institution, if you are part of it..')
+                    return jsonify({'error': 'User is not authorized to access data in WOS 2019'}), 401
             else:
                 sqs_response = sqs_client.send_message(
                     QueueUrl=janus_queue_url,
