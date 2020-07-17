@@ -78,7 +78,7 @@ def generate_wos_query(output_filter_string, filters):
     return interface_query, value_array
 
 def generate_wos_2019_query(output_filter_string, filters):
-    interface_query = 'SELECT ' + output_filter_string + ' FROM wos19.interface_tabl1e9 WHERE '
+    interface_query = 'SELECT ' + output_filter_string + ' FROM wos19.interface_table19 WHERE '
     value_array = []
     for item in filters:
         logger.info(item)
@@ -419,7 +419,7 @@ def submit_query():
                 if role_found:
                     logger.info('User has wos role')
                     sqs_response = sqs_client.send_message(
-                        QueueUrl=wos_queue_url,
+                        QueueUrl=queue_url,
                         MessageBody=query_in_string,
                         MessageGroupId='cadre'
                     )
