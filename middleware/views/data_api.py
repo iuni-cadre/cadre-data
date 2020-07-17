@@ -78,7 +78,7 @@ def generate_wos_query(output_filter_string, filters):
     return interface_query, value_array
 
 def generate_wos_2019_query(output_filter_string, filters):
-    interface_query = 'SELECT ' + output_filter_string + ' FROM wos19.interface_tabl19 WHERE '
+    interface_query = 'SELECT ' + output_filter_string + ' FROM wos19.interface_tabl1e9 WHERE '
     value_array = []
     for item in filters:
         logger.info(item)
@@ -360,8 +360,8 @@ def submit_query():
                     aws_secret_access_key=util.config_reader.get_aws_access_key_secret(),
                     region_name=util.config_reader.get_aws_region())
 
-            wos_queue_url = util.config_reader.get_aws_queue_url()
-            janus_queue_url = util.config_reader.get_janus_queue_url()
+            queue_url = util.config_reader.get_aws_queue_url()
+            # janus_queue_url = util.config_reader.get_janus_queue_url()
 
             role_found = False
             response_json = validate_token_response.json()
@@ -390,7 +390,7 @@ def submit_query():
                 if role_found:
                     logger.info('User has wos role')
                     sqs_response = sqs_client.send_message(
-                        QueueUrl=wos_queue_url,
+                        QueueUrl=queue_url,
                         MessageBody=query_in_string,
                         MessageGroupId='cadre'
                     )
@@ -446,7 +446,7 @@ def submit_query():
                     return jsonify({'error': 'User is not authorized to access data in WOS 2019'}), 401
             else:
                 sqs_response = sqs_client.send_message(
-                    QueueUrl=janus_queue_url,
+                    QueueUrl=queue_url,
                     MessageBody=query_in_string,
                     MessageGroupId='cadre'
                 )
